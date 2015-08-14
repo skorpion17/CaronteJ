@@ -3,6 +3,7 @@ package it.uniroma2.sii.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
@@ -58,6 +59,22 @@ public class IOUtils {
 		if (inputStream != null) {
 			try {
 				inputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Chiude la serverSocket {@code serverSocket} in modo aggraziato.
+	 * 
+	 * @param serverSocket
+	 */
+	public static void closeQuitely(ServerSocket serverSocket) {
+		/* Si chiude la ServerSocket */
+		if (serverSocket != null) {
+			try {
+				serverSocket.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

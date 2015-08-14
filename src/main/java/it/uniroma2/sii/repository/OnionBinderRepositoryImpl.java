@@ -30,9 +30,9 @@ public class OnionBinderRepositoryImpl implements OnionBinderRepositoryCustom {
 			/* Bisogna inserire l'onionBinder perche non è presente */
 			final Serializable maxAddressObject = onionBinderRepository
 					.findMaxOnionBinderAddress();
-			long maxAddress = 0L;
+			int maxAddress = 0;
 			if (maxAddressObject != null) {
-				maxAddress = Long.parseLong(maxAddressObject.toString());
+				maxAddress = Integer.parseInt(maxAddressObject.toString());
 			}
 			if (maxAddress < OnionBinderConfig.ONION_BINDER_ADDRESS_4_BYTE_START) {
 				/* Non c'è alcun indirizzo valido nel db */

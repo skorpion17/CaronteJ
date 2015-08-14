@@ -23,10 +23,8 @@ public class OnionBinder {
 	public static final String ONION_BINDER_ADDRESS_FIELD_NAME = "address";
 
 	@Id
-	//@GenericGenerator(name = OnionBinderGenerator.ONION_BINDER_GENERATOR_NAME_SEQUENCE_ID, strategy = OnionBinderGenerator.ONION_BINDER_GENERATOR_STRATEGY)
-	//@GeneratedValue(generator = OnionBinderGenerator.ONION_BINDER_GENERATOR_NAME_SEQUENCE_ID)
 	@Column(name = ONION_BINDER_ADDRESS_FIELD_NAME)
-	private long address;
+	private int address;
 	private String onionName;
 
 	// TODO: AGGIUNGERE CAMPO PER IL TIMESTAMP PER LA CREAZIONE DI UN
@@ -65,7 +63,7 @@ public class OnionBinder {
 	 * @param address
 	 *            the address to set
 	 */
-	public void setAddress(long address) {
+	public void setAddress(int address) {
 		this.address = address;
 	}
 

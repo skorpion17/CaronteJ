@@ -22,13 +22,6 @@ public class App {
 	public void init() {
 		torDNSServer.start();
 		httpProxyServer.start();
-		try {
-			/* Attende che il server termini */
-			torDNSServer.join();
-			httpProxyServer.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package it.uniroma2.sii.service.tor.webproxy.server;
 
 import it.uniroma2.sii.io.IOUtils;
+import it.uniroma2.sii.service.tor.OnionBinderService;
 import it.uniroma2.sii.sock.SOCKSSocket;
 import it.uniroma2.sii.sock.SocketUtils;
 
@@ -26,6 +27,8 @@ public class ProxyConnectionHandler extends Thread {
 	private static final int BUFFER_INPUT_STREAM_SIZE_IN_BYTE = 8192;
 
 	private final HTTPProxyServer httpProxyServer;
+	private final OnionBinderService onionBinderService;
+
 	private final Socket clientSocket;
 	private Socket proxyServerSocket;
 
@@ -84,7 +87,7 @@ public class ProxyConnectionHandler extends Thread {
 				 * Ottiene la risposta dal server (proxy TOR) e la inoltra al
 				 * client.
 				 */
-				final byte[] bufferServerToClient = new byte[8192];
+				final byte[] bufferServerToClient = new byte[BUFFER_INPUT_STREAM_SIZE_IN_BYTE];
 				int read = -1;
 				while ((read = serverInputStream.read(bufferServerToClient)) != -1) {
 					/*
@@ -127,6 +130,7 @@ public class ProxyConnectionHandler extends Thread {
 			final Socket clientSocket) throws IOException {
 		this.httpProxyServer = httpProxyServer;
 		this.clientSocket = clientSocket;
+		this.onionBinderService = this.httpProxyServer.getOnionBinderService();
 		/*
 		 * Viene avviato il thread che tenta di stabilire la connessione con il
 		 * Proxy TOR; NB: questa operazione può essere anche molto lenta.
@@ -150,6 +154,17 @@ public class ProxyConnectionHandler extends Thread {
 		/* Si apre la socket con il Proxy di TOR */
 		proxyServerSocket = new SOCKSSocket(
 				httpProxyServer.getTorSocketAddress());
+		/* .onion */
+		if (onionBinderService
+				.isInetAddressForInternalOnionResolution(destSocketAddress
+						.getAddress())) {
+			/*
+			 * L'indirizzo ip è interno e riservato per la risoluzione interna
+			 * degli hidden service (.onion)
+			 */
+			destSocketAddress = (InetSocketAddress) onionBinderService
+					.resolveCachedOnionNameByInternalInetSocketAddress(destSocketAddress);
+		}
 		/*
 		 * Si connette alla destinazione attraverso la rete di TOR, con la
 		 * connect esplicita sulla socket; inoltre si crea un SocketAddress
@@ -204,7 +219,7 @@ public class ProxyConnectionHandler extends Thread {
 	}
 
 	/**
-	 * Logging.
+	 * Logging. TODO: DIFFERENZIARE LA REQUEST DALLA RESPONSE.
 	 * 
 	 * @param inputStream
 	 * @throws IOException
@@ -216,6 +231,7 @@ public class ProxyConnectionHandler extends Thread {
 			break;
 		case HTTPS:
 			logHTTPSHeader(inputStream);
+			break;
 		default:
 			logDefaultImpl(inputStream);
 			break;
@@ -259,34 +275,22 @@ public class ProxyConnectionHandler extends Thread {
 	 * @param inputStream
 	 */
 	public void logHTTPImpl(final InputStream inputStream) throws IOException {
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new InputStreamReader(inputStream));
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				if (line.length() == 0) {
-					/* Trovato il marker di fine HEADER per HTTP */
-					break;
-				}
-				System.out.println("Header:" + line);
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(
+				inputStream));
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			if (line.length() == 0) {
+				/* Trovato il marker di fine HEADER per HTTP */
+				break;
 			}
-		} finally {
-			if (reader != null) {
-				try {
-					// FIXME: Non chiudere il reader poichè la sua chiusura
-					// implica quella del clientInputStream
-
-					// reader.close();
-				} catch (Exception e) {
-					/* Non loggare nulla */
-				}
-			}
+			System.out.println("Header:" + line);
 		}
 	}
 
 	// FIXME: ABSTRACT
 	public void logHTTPSImpl(final InputStream inputStream) throws IOException {
-		// TODO Auto-generated method stub
+		System.out.printf("\t >>> HTTPS Request: [%s] <<<\n",
+				destSocketAddress.toString());
 	}
 
 	// FIXME
@@ -309,7 +313,7 @@ public class ProxyConnectionHandler extends Thread {
 		/*
 		 * Si inoltra la richiesta al server (proxy TOR).
 		 */
-		final byte[] bufferClientToServer = new byte[8192];
+		final byte[] bufferClientToServer = new byte[BUFFER_INPUT_STREAM_SIZE_IN_BYTE];
 		int read = -1;
 		while ((read = clientInputStream.read(bufferClientToServer)) != -1) {
 			/* L'input della clientSocket viene passata alla serverSocket */

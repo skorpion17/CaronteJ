@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface OnionBinderRepository extends
-		CrudRepository<OnionBinder, Long>, OnionBinderRepositoryCustom {
+		CrudRepository<OnionBinder, Integer>, OnionBinderRepositoryCustom {
 
 	public OnionBinder findByOnionName(final String onionName);
 

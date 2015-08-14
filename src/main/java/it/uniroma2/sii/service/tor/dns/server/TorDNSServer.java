@@ -57,7 +57,7 @@ public class TorDNSServer extends Thread {
 	 *
 	 */
 	private class TorDNSRequestHandler extends Thread {
-		private static final String SUFFIX_REGEX_ONION = ".+\\.onion\\.$";
+		private static final String SUFFIX_REGEX_ONION = ".+\\.onion$";
 		private DatagramPacket dnsRequestPacket;
 
 		/**
@@ -85,7 +85,7 @@ public class TorDNSServer extends Thread {
 			final Record question = message.getQuestion();
 			/* Si prende l'hostname dal record */
 			final Name hostname = question.getName();
-			final String host = hostname.toString();
+			final String host = hostname.toString(true);
 
 			InetAddress inetAddress;
 			/* Si verifica che l'hostname non sia un .onion */
