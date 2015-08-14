@@ -1,6 +1,7 @@
 package it.uniroma2.sii;
 
 import it.uniroma2.sii.service.tor.dns.server.TorDNSServer;
+import it.uniroma2.sii.service.tor.webproxy.server.HTTPProxyServer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -12,15 +13,19 @@ public class App {
 
 	@Autowired
 	private TorDNSServer torDNSServer;
+	@Autowired
+	private HTTPProxyServer httpProxyServer;
 
 	/**
 	 * TODO: Inizializza l'applicazione.
 	 */
 	public void init() {
 		torDNSServer.start();
+		httpProxyServer.start();
 		try {
 			/* Attende che il server termini */
 			torDNSServer.join();
+			httpProxyServer.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
