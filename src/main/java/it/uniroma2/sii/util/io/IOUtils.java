@@ -1,4 +1,4 @@
-package it.uniroma2.sii.io;
+package it.uniroma2.sii.util.io;
 
 import java.io.IOException;
 import java.io.InputStream;

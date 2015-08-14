@@ -1,9 +1,9 @@
 package it.uniroma2.sii.service.tor.webproxy.server;
 
-import it.uniroma2.sii.io.IOUtils;
 import it.uniroma2.sii.service.tor.OnionBinderService;
 import it.uniroma2.sii.sock.SOCKSSocket;
-import it.uniroma2.sii.sock.SocketUtils;
+import it.uniroma2.sii.util.io.IOUtils;
+import it.uniroma2.sii.util.socket.SocketUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

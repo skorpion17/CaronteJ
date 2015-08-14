@@ -1,4 +1,4 @@
-package it.uniroma2.sii.sock;
+package it.uniroma2.sii.util.socket;
 
 import java.io.DataInputStream;
 import java.io.IOException;

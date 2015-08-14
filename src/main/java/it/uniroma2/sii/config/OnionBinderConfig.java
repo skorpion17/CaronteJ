@@ -1,9 +1,51 @@
 package it.uniroma2.sii.config;
 
+import it.uniroma2.sii.service.tor.OnionBinderService;
+
+/**
+ * Configurazione per {@link OnionBinderService}
+ * 
+ * @author andrea
+ *
+ */
 public interface OnionBinderConfig {
-	public static final int ADDRESS_IPV4_MASK = 0xffffffff;
-	public static final int ONION_BINDER_ADDRESS_4_BYTE_START = 0x7f010001;
-	public static final int ONION_BINDER_ADDRESS_4_BYTE_START_NETMASK = 0xffff0000;
-	public static final int ONION_BINDER_ADDRESS_4_BYTE_SUBNET = 0x7f010000;
-	public static final int ONION_BINDER_ADDRESS_INCREMENT = 0x01;
+	/**
+	 * Maschera per indirizzo IPv4.
+	 * 
+	 * @deprecated
+	 * @return
+	 */
+	public int getAddressIPv4Mask();
+
+	/**
+	 * Ottiene l'indirizzo di partenza utilizzato per la risoluzione interna dei
+	 * .onion.
+	 * 
+	 * @return
+	 */
+	public int getOnionBinderAddressStartFrom();
+
+	/**
+	 * Ottiene la maschera di rete per la famiglia di indirizzi utilizzati per
+	 * la risoluzione interna dei .onion.
+	 * 
+	 * @return
+	 */
+	public int getOnionBinderAddressNetmask();
+
+	/**
+	 * Ottiene la sottorete per la famiglia di indirizzi utilizzati per la
+	 * risoluzione interna dei .onion.
+	 * 
+	 * @return
+	 */
+	public int getOnionBinderAddressSubnet();
+
+	/**
+	 * Ottiene l'incremento utilizzato per generare il prossimo indirizzo
+	 * interno utilzzato per la risoluzione interna dei .onion.
+	 * 
+	 * @return
+	 */
+	public int getOnionBinderAddressIncrement();
 }

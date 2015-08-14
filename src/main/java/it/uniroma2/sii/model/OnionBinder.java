@@ -1,7 +1,5 @@
 package it.uniroma2.sii.model;
 
-import it.uniroma2.sii.config.OnionBinderConfig;
-
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -12,6 +10,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
+ * OnionBinder permette di tenere accoppiato un indirizzp IPv4 ad un .onion per
+ * rendere possibile la risoluzione interna dei .onion. Questo può risultare
+ * molto utile qualora si voglia risolvere attraverso un indirizzo fittizio un
+ * .onion e usare successivamente l'ip fittizio per riferirsi sempre allo stesso
+ * .onion rendendo possibile gestire la risoluzione di un qualsiasi indirizzo
+ * (sia un hidden service che un host canonico).
  * 
  * @author andrea
  *
@@ -74,12 +78,7 @@ public class OnionBinder {
 	 * @throws UnknownHostException
 	 */
 	public InetAddress getInetAddress() throws UnknownHostException {
-		// final int ipv4 = (int) ((address & OnionBinderConfig.ADDRESS_MASK) >>
-		// OnionBinderConfig.ADDRESS_6_BYTE_SHIFT_RIGHT_TO_IPV4);
-		// final int port = (int) (address & OnionBinderConfig.PORT_MASK);
-		// final byte[] bytes = BigInteger.valueOf(ipv4).toByteArray();
-		// return new InetSocketAddress(InetAddress.getByAddress(bytes), port);
-		final int ipAddress = (int) (getAddress() & OnionBinderConfig.ADDRESS_IPV4_MASK);
+		final int ipAddress = (int) (getAddress());
 		final byte[] bytes = BigInteger.valueOf(ipAddress).toByteArray();
 		return InetAddress.getByAddress(bytes);
 	}

@@ -1,5 +1,7 @@
 package it.uniroma2.sii.config;
 
+import it.uniroma2.sii.config.impl.OnionBinderConfigImpl;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -23,5 +25,10 @@ public class AppConfig {
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
+	}
+
+	@Bean
+	public OnionBinderConfig onionBinderConfig() {
+		return new OnionBinderConfigImpl();
 	}
 }

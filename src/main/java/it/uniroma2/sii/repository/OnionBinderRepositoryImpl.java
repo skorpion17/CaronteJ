@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public class OnionBinderRepositoryImpl implements OnionBinderRepositoryCustom {
 	@Autowired
+	private OnionBinderConfig onionBinderConfig;
+	@Autowired
 	private OnionBinderRepository onionBinderRepository;
 	private Object lock = new Object();
 
@@ -34,12 +36,12 @@ public class OnionBinderRepositoryImpl implements OnionBinderRepositoryCustom {
 			if (maxAddressObject != null) {
 				maxAddress = Integer.parseInt(maxAddressObject.toString());
 			}
-			if (maxAddress < OnionBinderConfig.ONION_BINDER_ADDRESS_4_BYTE_START) {
+			if (maxAddress < onionBinderConfig.getOnionBinderAddressStartFrom()) {
 				/* Non c'è alcun indirizzo valido nel db */
-				maxAddress += OnionBinderConfig.ONION_BINDER_ADDRESS_4_BYTE_START;
+				maxAddress += onionBinderConfig.getOnionBinderAddressStartFrom();
 			}
 			/* Si incrementa l'indirizzo per ottenere il successivo */
-			maxAddress += OnionBinderConfig.ONION_BINDER_ADDRESS_INCREMENT;
+			maxAddress += onionBinderConfig.getOnionBinderAddressIncrement();
 			System.out.printf("\t >>> register OnionBinderAddress: %d <<<\n",
 					maxAddress);
 			/* Imposta il nuovo indirizzo */

@@ -3,12 +3,12 @@ package it.uniroma2.sii.service.tor;
 import it.uniroma2.sii.config.OnionBinderConfig;
 import it.uniroma2.sii.model.OnionBinder;
 import it.uniroma2.sii.repository.OnionBinderRepository;
+import it.uniroma2.sii.util.address.AddressUtils;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,16 +17,8 @@ import org.springframework.stereotype.Service;
 public class OnionBinderService {
 	@Autowired
 	private OnionBinderRepository onionBinderRepository;
-
-	/**
-	 * Converte InetAddress se
-	 * 
-	 * @param address
-	 * @return
-	 */
-	private int fromInetAddressToIntIPv4(final InetAddress address) {
-		return ByteBuffer.wrap(address.getAddress()).getInt();
-	}
+	@Autowired
+	private OnionBinderConfig onionBinderConfig;
 
 	/**
 	 * Ottiene la socketAddress relativa ad un .onion risolto internamente
@@ -42,8 +34,8 @@ public class OnionBinderService {
 		 * Ottiene la notazione in intero (network-byte-order) dell'indirizzo
 		 * ipv4 specificato in {@code socketAddress}
 		 */
-		final int resolvedInternalIp = fromInetAddressToIntIPv4(socketAddress
-				.getAddress());
+		final int resolvedInternalIp = AddressUtils
+				.fromInetAddressToIntIPv4(socketAddress.getAddress());
 		final OnionBinder onionBinder = onionBinderRepository
 				.findOne(resolvedInternalIp);
 		if (onionBinder == null) {
@@ -69,9 +61,10 @@ public class OnionBinderService {
 	 */
 	public boolean isInetAddressForInternalOnionResolution(
 			final InetAddress address) {
-		final int ipV4 = fromInetAddressToIntIPv4(address);
-		final int result = (OnionBinderConfig.ONION_BINDER_ADDRESS_4_BYTE_START_NETMASK & OnionBinderConfig.ONION_BINDER_ADDRESS_4_BYTE_SUBNET)
-				^ (ipV4 & OnionBinderConfig.ONION_BINDER_ADDRESS_4_BYTE_START_NETMASK);
+		final int ipV4 = AddressUtils.fromInetAddressToIntIPv4(address);
+		final int result = (onionBinderConfig.getOnionBinderAddressNetmask() & onionBinderConfig
+				.getOnionBinderAddressSubnet())
+				^ (ipV4 & onionBinderConfig.getOnionBinderAddressNetmask());
 		if (result != 0x0) {
 			/* Non appartire alla sottorete */
 			return false;
