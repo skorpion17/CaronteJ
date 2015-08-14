@@ -12,16 +12,16 @@ import org.springframework.beans.factory.annotation.Value;
  *
  */
 public class OnionBinderConfigImpl implements OnionBinderConfig {
-	@Value("${onion_binder_address_start_from}")
+	@Value("${onion.binder.address.startfrom}")
 	public String onionBinderAddressStartFrom;
 
-	@Value("${onion_binder_address_start_netmask}")
+	@Value("${onion.binder.address.start.netmask}")
 	private String onionBinderAddressNetmask;
 
-	@Value("${onion_binder_address_subnet}")
+	@Value("${onion.binder.address.subnet}")
 	private String onionBinderAddressSubnet;
 
-	@Value("${onion_binder_address_increment}")
+	@Value("${onion.binder.address.increment}")
 	private String onionBinderAddressIncrement;
 
 	@Override

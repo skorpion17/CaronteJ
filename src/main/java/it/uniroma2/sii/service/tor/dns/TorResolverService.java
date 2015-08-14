@@ -44,14 +44,14 @@ public class TorResolverService {
 	 * risoluzione dei nomi attraverso la rete. Il valore viene letto dal file
 	 * di configurazione.
 	 */
-	@Value("${proxy_tor_bind_address}")
+	@Value("${proxy.tor.bind.address}")
 	private String proxyTorBindAddress;
 
 	/**
 	 * Porta sulla quale contattare il proxy tor per la risoluzione dei nomi
 	 * attraverso la rete. Il valore viene letto dal file di configurazione.
 	 */
-	@Value("${proxy_tor_bind_port}")
+	@Value("${proxy.tor.bind.port}")
 	private int proxyTorBindPort;
 
 	/**

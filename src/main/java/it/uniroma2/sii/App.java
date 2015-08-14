@@ -1,7 +1,7 @@
 package it.uniroma2.sii;
 
 import it.uniroma2.sii.service.tor.dns.server.TorDNSServer;
-import it.uniroma2.sii.service.tor.webproxy.server.HTTPProxyServer;
+import it.uniroma2.sii.service.tor.web.server.WebProxyServer;
 
 import java.net.UnknownHostException;
 
@@ -19,7 +19,7 @@ public class App {
 	@Autowired
 	private TorDNSServer torDNSServer;
 	@Autowired
-	private HTTPProxyServer httpProxyServer;
+	private WebProxyServer httpProxyServer;
 
 	/**
 	 * TODO: Inizializza l'applicazione.

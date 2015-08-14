@@ -38,10 +38,10 @@ public class TorDNSServer extends Thread {
 	@Autowired
 	private TorResolverService torResolverService;
 
-	@Value("${dns_tor_bind_address}")
+	@Value("${dns.tor.bind.address}")
 	private String dnsTorBindAddress;
 
-	@Value("${dns_tor_bind_port}")
+	@Value("${dns.tor.bind.port}")
 	private int dnsTorBindPort;
 
 	private DatagramSocket datagramSocket;

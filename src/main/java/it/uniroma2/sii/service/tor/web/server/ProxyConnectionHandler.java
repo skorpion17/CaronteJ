@@ -1,4 +1,4 @@
-package it.uniroma2.sii.service.tor.webproxy.server;
+package it.uniroma2.sii.service.tor.web.server;
 
 import it.uniroma2.sii.service.tor.OnionBinderService;
 import it.uniroma2.sii.sock.SOCKSSocket;
@@ -26,7 +26,7 @@ public class ProxyConnectionHandler extends Thread {
 	 */
 	private static final int BUFFER_INPUT_STREAM_SIZE_IN_BYTE = 8192;
 
-	private final HTTPProxyServer httpProxyServer;
+	private final WebProxyServer httpProxyServer;
 	private final OnionBinderService onionBinderService;
 
 	private final Socket clientSocket;
@@ -126,7 +126,7 @@ public class ProxyConnectionHandler extends Thread {
 	 * @param clientSocket
 	 * @throws IOException
 	 */
-	public ProxyConnectionHandler(final HTTPProxyServer httpProxyServer,
+	public ProxyConnectionHandler(final WebProxyServer httpProxyServer,
 			final Socket clientSocket) throws IOException {
 		this.httpProxyServer = httpProxyServer;
 		this.clientSocket = clientSocket;

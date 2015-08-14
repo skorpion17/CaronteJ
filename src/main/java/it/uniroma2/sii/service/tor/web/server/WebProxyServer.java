@@ -1,8 +1,8 @@
-package it.uniroma2.sii.service.tor.webproxy.server;
+package it.uniroma2.sii.service.tor.web.server;
 
 import it.uniroma2.sii.model.OnionBinder;
 import it.uniroma2.sii.service.tor.OnionBinderService;
-import it.uniroma2.sii.service.tor.webproxy.server.ProxyConnectionHandler.ProtocolType;
+import it.uniroma2.sii.service.tor.web.server.ProxyConnectionHandler.ProtocolType;
 import it.uniroma2.sii.util.io.IOUtils;
 
 import java.io.IOException;
@@ -24,34 +24,34 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class HTTPProxyServer extends Thread {
+public class WebProxyServer extends Thread {
 	/**
 	 * Porte per HTTP
 	 */
-	@Value("${http_service_ports}")
+	@Value("${http.service.ports}")
 	private int[] httpServicePorts;
 	private HashSet<Integer> httpServicePortsSet = new HashSet<Integer>();
 	/**
 	 * Porte per HTTPS
 	 */
-	@Value("${https_service_ports}")
+	@Value("${https.service.ports}")
 	private int[] httpsServicePorts;
 	private HashSet<Integer> httpsServicePortsSet = new HashSet<Integer>();
 
 	/**
-	 * Porta su cui il server HTTPProxyServer è in ascolto.
+	 * Porta su cui il server WebProxyServer è in ascolto.
 	 */
-	@Value("${http_proxy_server_bind_port}")
+	@Value("${proxy.web.server.bind.port}")
 	private int httpProxyServerBindPort;
 	/**
 	 * Indirizzo su cui il proxy di TOR è in ascolto
 	 */
-	@Value("${proxy_tor_bind_address}")
+	@Value("${proxy.tor.bind.address}")
 	private String proxyTorBindAddress;
 	/**
 	 * Porta su cui il proxy di TOR è in ascolto
 	 */
-	@Value("${proxy_tor_bind_port}")
+	@Value("${proxy.tor.bind.port}")
 	private int proxyTorBindPort;
 
 	@Autowired
@@ -78,7 +78,7 @@ public class HTTPProxyServer extends Thread {
 			/* ServerSocket su cui HTTPRoxyServer è in ascolto */
 			serverSocket = new ServerSocket(httpProxyServerBindPort);
 
-			System.out.println("\t >>> HTTPProxyServer is started <<<");
+			System.out.println("\t >>> WebProxyServer is started <<<");
 
 			while (true) {
 				/* Per ogni connessione in arrivo */
