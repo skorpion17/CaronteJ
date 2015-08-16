@@ -35,7 +35,7 @@ public class App {
 	 * @param args
 	 * @throws UnknownHostException
 	 */
-	public static void main(String[] args) throws UnknownHostException {
+	public static void main(String[] args) {
 		@SuppressWarnings("resource")
 		final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				APPLICATION_CONTEXT_XML);

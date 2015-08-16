@@ -1,15 +1,15 @@
 package it.uniroma2.sii.service.tor.web.server;
 
 import it.uniroma2.sii.service.tor.OnionBinderService;
+import it.uniroma2.sii.service.tor.web.server.log.Logger;
+import it.uniroma2.sii.service.tor.web.server.log.impl.DefaultLogger;
 import it.uniroma2.sii.sock.SOCKSSocket;
 import it.uniroma2.sii.util.io.IOUtils;
 import it.uniroma2.sii.util.socket.SocketUtils;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -20,11 +20,7 @@ import java.net.Socket;
  *
  */
 public class ProxyConnectionHandler extends Thread {
-	/**
-	 * TODO: Un massimo di 100 campi nell'header oguno dei quali deve essere al
-	 * massimo lungo 8190.
-	 */
-	private static final int BUFFER_INPUT_STREAM_SIZE_IN_BYTE = 8192;
+	private static final int BUFFER_INPUT_STREAM_SIZE_IN_BYTE = 1024;
 
 	private final WebProxyServer httpProxyServer;
 	private final OnionBinderService onionBinderService;
@@ -42,6 +38,15 @@ public class ProxyConnectionHandler extends Thread {
 
 	/** Indirizzo di destinazione a cui ci si connette attraverso la rete TOR */
 	private InetSocketAddress destSocketAddress;
+
+	/**
+	 * Logger per la richiesta.
+	 */
+	private Logger requestLogger;
+	/**
+	 * Logger per la risposta.
+	 */
+	private Logger responseLogger;
 
 	/**
 	 * Tipi di protocolli supportati dall'handler.
@@ -81,7 +86,10 @@ public class ProxyConnectionHandler extends Thread {
 				/*
 				 * Operazione di log.
 				 */
-				log(serverInputStream);
+				// log(serverInputStream);
+				if (responseLogger != null) {
+					responseLogger.log();
+				}
 
 				/*
 				 * Ottiene la risposta dal server (proxy TOR) e la inoltra al
@@ -136,6 +144,58 @@ public class ProxyConnectionHandler extends Thread {
 		 * Proxy TOR; NB: questa operazione può essere anche molto lenta.
 		 */
 		start();
+	}
+
+	/**
+	 * Ottiene il logger per la richiesta.
+	 * 
+	 * @return
+	 */
+	public Logger getLoggerRequest() {
+		return requestLogger;
+	}
+
+	/**
+	 * Imposta il logger per la richiesta.
+	 * 
+	 * @param requestLogger
+	 */
+	public void setLoggerRequest(Logger loggerRequest) {
+		this.requestLogger = loggerRequest;
+	}
+
+	/**
+	 * Ottiene il logger per la risposta.
+	 * 
+	 * @return
+	 */
+	public Logger getLoggerResponse() {
+		return responseLogger;
+	}
+
+	/**
+	 * Imposta il logger per la risposta.
+	 * 
+	 * @param responseLogger
+	 */
+	public void setLoggerResponse(Logger loggerResponse) {
+		this.responseLogger = loggerResponse;
+	}
+
+	/**
+	 * @return the destSocketAddress
+	 */
+	public InetSocketAddress getDestSocketAddress() {
+		return destSocketAddress;
+	}
+
+	/**
+	 * Ritorna il tipo di protocollo gestito dall'handler.
+	 * 
+	 * @return
+	 */
+	public ProtocolType getProtocolType() {
+		return protocolType;
 	}
 
 	/**
@@ -202,6 +262,20 @@ public class ProxyConnectionHandler extends Thread {
 	}
 
 	/**
+	 * Inizializzai i logger per la richiesta e la risposta.
+	 */
+	private void initLogger() {
+		if (clientInputStream != null) {
+			requestLogger = new DefaultLogger(this, clientInputStream,
+					"Request");
+		}
+		if (serverInputStream != null) {
+			responseLogger = new DefaultLogger(this, serverInputStream,
+					"Response");
+		}
+	}
+
+	/**
 	 * Chiude gli stream e le socket in modo aggraziato liberando le risorse.
 	 */
 	private void closeAllQuitely() {
@@ -219,87 +293,6 @@ public class ProxyConnectionHandler extends Thread {
 	}
 
 	/**
-	 * Logging. TODO: DIFFERENZIARE LA REQUEST DALLA RESPONSE.
-	 * 
-	 * @param inputStream
-	 * @throws IOException
-	 */
-	private void log(final InputStream inputStream) throws IOException {
-		switch (protocolType) {
-		case HTTP:
-			logHTTPHeader(inputStream);
-			break;
-		case HTTPS:
-			logHTTPSHeader(inputStream);
-			break;
-		default:
-			logDefaultImpl(inputStream);
-			break;
-		}
-	}
-
-	/**
-	 * Permette di lanciare l'avvio dell'attività di logging per la richiesta
-	 * del client.
-	 * 
-	 * @param inputStream
-	 * @throws IOException
-	 */
-	private void logHTTPHeader(final InputStream inputStream)
-			throws IOException {
-		/* Viene impostato il marker e si logga successivamente */
-		inputStream.mark(BUFFER_INPUT_STREAM_SIZE_IN_BYTE);
-		/* Si logga l'header */
-		logHTTPImpl(inputStream);
-		/*
-		 * Si resetta l'header in modo tale che lo stream possa essere
-		 * nuovamente letto dal punto in cui è stato inserito il marker
-		 */
-		inputStream.reset();
-	}
-
-	/**
-	 * Entry point per l'implementazione del log per HTTPS.
-	 * 
-	 * @param inputStream
-	 */
-	private void logHTTPSHeader(final InputStream inputStream)
-			throws IOException {
-		logHTTPSImpl(inputStream);
-	}
-
-	/**
-	 * TODO: TEMPLATE METHOD, RENDERE PROXY_CONNECTION_HANDLER ASTRATTA E
-	 * FORZARE LA DEFINIZIONE DI logHTTPImpl.
-	 * 
-	 * @param inputStream
-	 */
-	public void logHTTPImpl(final InputStream inputStream) throws IOException {
-		final BufferedReader reader = new BufferedReader(new InputStreamReader(
-				inputStream));
-		String line = null;
-		while ((line = reader.readLine()) != null) {
-			if (line.length() == 0) {
-				/* Trovato il marker di fine HEADER per HTTP */
-				break;
-			}
-			System.out.println("Header:" + line);
-		}
-	}
-
-	// FIXME: ABSTRACT
-	public void logHTTPSImpl(final InputStream inputStream) throws IOException {
-		System.out.printf("\t >>> HTTPS Request: [%s] <<<\n",
-				destSocketAddress.toString());
-	}
-
-	// FIXME
-	public void logDefaultImpl(final InputStream inputStream)
-			throws IOException {
-		System.out.println("logDefaultImpl NOT YET IMPLEMENTED");
-	}
-
-	/**
 	 * Invia la richiesta inoltrata dal client al lato server per poterla girare
 	 * su TOR.
 	 * 
@@ -309,7 +302,13 @@ public class ProxyConnectionHandler extends Thread {
 		/*
 		 * Operazioni di log.
 		 */
-		log(clientInputStream);
+		// log(clientInputStream);
+
+		if (requestLogger != null) {
+			/* Il logger per la request è stato impostato */
+			requestLogger.log();
+		}
+
 		/*
 		 * Si inoltra la richiesta al server (proxy TOR).
 		 */
@@ -363,6 +362,8 @@ public class ProxyConnectionHandler extends Thread {
 			torConnect();
 			/* Apre gli streams */
 			openStreams();
+			/* Imposta i logger */
+			initLogger();
 			/* Scambio dei dati */
 			socketSplice();
 		} catch (IOException e) {
