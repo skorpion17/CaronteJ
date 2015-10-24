@@ -1,5 +1,7 @@
 package it.uniroma2.sii.service.tor.web.server;
 
+import it.uniroma2.sii.log.Logger;
+import it.uniroma2.sii.log.LoggerHandler;
 import it.uniroma2.sii.model.OnionBinder;
 import it.uniroma2.sii.service.tor.OnionBinderService;
 import it.uniroma2.sii.service.tor.web.server.ProxyConnectionHandler.ProtocolType;
@@ -57,6 +59,9 @@ public class WebProxyServer extends Thread {
 	@Autowired
 	private OnionBinderService onionBinderService;
 
+	@Autowired
+	private LoggerHandler logger;
+
 	@PostConstruct
 	private void init() {
 		/*
@@ -106,6 +111,15 @@ public class WebProxyServer extends Thread {
 	 */
 	public OnionBinderService getOnionBinderService() {
 		return onionBinderService;
+	}
+
+	/**
+	 * Consente di ottenere il LoggerHandler.
+	 * 
+	 * @return
+	 */
+	public Logger getLogger() {
+		return logger;
 	}
 
 	/**

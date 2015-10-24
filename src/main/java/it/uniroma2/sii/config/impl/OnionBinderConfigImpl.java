@@ -24,12 +24,11 @@ public class OnionBinderConfigImpl implements OnionBinderConfig {
 	@Value("${onion.binder.address.increment}")
 	private String onionBinderAddressIncrement;
 
-	@Override
 	public int getAddressIPv4Mask() {
 		return 0xffffffff;
 	}
 
-	@Override
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -41,7 +40,7 @@ public class OnionBinderConfigImpl implements OnionBinderConfig {
 				.fromDotDecimalToIntIPv4(onionBinderAddressStartFrom);
 	}
 
-	@Override
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -53,7 +52,7 @@ public class OnionBinderConfigImpl implements OnionBinderConfig {
 				.parseInt(onionBinderAddressNetmask)));
 	}
 
-	@Override
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -64,7 +63,7 @@ public class OnionBinderConfigImpl implements OnionBinderConfig {
 		return AddressUtils.fromDotDecimalToIntIPv4(onionBinderAddressSubnet);
 	}
 
-	@Override
+	
 	/*
 	 * (non-Javadoc)
 	 * 

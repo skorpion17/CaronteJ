@@ -62,7 +62,6 @@ public class OnionBinderRepositoryImpl implements OnionBinderRepositoryCustom {
 	 * mutuamente esclusivo, è necessario wrappare un un metodo che si
 	 * interfaccia col repository annotato con @Transactional.
 	 */
-	@Override
 	public OnionBinder registerOnionByName(final String onionName) {
 		synchronized (lock) {
 			return persistOnionByName(onionName);

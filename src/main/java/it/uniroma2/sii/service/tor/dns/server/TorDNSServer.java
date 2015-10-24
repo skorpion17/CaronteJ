@@ -25,7 +25,7 @@ import org.xbill.DNS.Section;
  * hostname in indirizzi ip. Tiene in considerazione anche della risoluzione
  * interna per la risoluzione di eventuali .onion.
  * 
- * @author andrea
+ * @author Andrea Mayer, Emanuele Altomare
  *
  */
 @Service
@@ -78,7 +78,7 @@ public class TorDNSServer extends Thread {
 		 * @return
 		 * @throws IOException
 		 */
-		private DatagramPacket createDNSRensponsePacket(
+		private DatagramPacket createDNSResponsePacket(
 				final DatagramPacket dnsRequestPacket) throws IOException {
 			/* Crea i messaggio a partire dal pacchetto di richiesta */
 			final Message message = new Message(dnsRequestPacket.getData());
@@ -126,7 +126,7 @@ public class TorDNSServer extends Thread {
 		public void run() {
 			try {
 				/* Gestisce la traduzione del nome */
-				final DatagramPacket dnsResponsePacket = createDNSRensponsePacket(dnsRequestPacket);
+				final DatagramPacket dnsResponsePacket = createDNSResponsePacket(dnsRequestPacket);
 				System.out
 						.println("\t >>> TorDNSRequestHandler managed DNS Request and replied to the client <<<");
 				/*

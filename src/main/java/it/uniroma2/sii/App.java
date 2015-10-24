@@ -1,5 +1,6 @@
 package it.uniroma2.sii;
 
+import it.uniroma2.sii.log.LoggerHandler;
 import it.uniroma2.sii.service.tor.dns.server.TorDNSServer;
 import it.uniroma2.sii.service.tor.web.server.WebProxyServer;
 
@@ -20,6 +21,8 @@ public class App {
 	private TorDNSServer torDNSServer;
 	@Autowired
 	private WebProxyServer httpProxyServer;
+	@Autowired
+	private LoggerHandler logger;
 
 	/**
 	 * TODO: Inizializza l'applicazione.

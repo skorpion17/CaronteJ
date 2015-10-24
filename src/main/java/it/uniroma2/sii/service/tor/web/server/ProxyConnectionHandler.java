@@ -1,9 +1,11 @@
 package it.uniroma2.sii.service.tor.web.server;
 
+import it.uniroma2.sii.log.Logger;
 import it.uniroma2.sii.service.tor.OnionBinderService;
-import it.uniroma2.sii.service.tor.web.server.log.Logger;
-import it.uniroma2.sii.service.tor.web.server.log.impl.DefaultLogger;
 import it.uniroma2.sii.sock.SOCKSSocket;
+import it.uniroma2.sii.util.data.Data;
+import it.uniroma2.sii.util.data.DataFactory;
+import it.uniroma2.sii.util.data.unknown.UnknownData;
 import it.uniroma2.sii.util.io.IOUtils;
 import it.uniroma2.sii.util.socket.SocketUtils;
 
@@ -13,19 +15,26 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.UUID;
 
 /**
+ * Gestisce la connessione con il proxy.
  * 
- * @author andrea
- *
+ * @author Andrea Mayer, Emanuele Altomare
  */
 public class ProxyConnectionHandler extends Thread {
 	private static final int BUFFER_INPUT_STREAM_SIZE_IN_BYTE = 1024;
+
+	/**
+	 * questo id identifica la connessione.
+	 */
+	private final UUID connectionId;
 
 	private final WebProxyServer httpProxyServer;
 	private final OnionBinderService onionBinderService;
 
 	private final Socket clientSocket;
+
 	private Socket proxyServerSocket;
 
 	/** Stream per il client */
@@ -40,13 +49,9 @@ public class ProxyConnectionHandler extends Thread {
 	private InetSocketAddress destSocketAddress;
 
 	/**
-	 * Logger per la richiesta.
+	 * Logger
 	 */
-	private Logger requestLogger;
-	/**
-	 * Logger per la risposta.
-	 */
-	private Logger responseLogger;
+	private Logger logger;
 
 	/**
 	 * Tipi di protocolli supportati dall'handler.
@@ -66,44 +71,75 @@ public class ProxyConnectionHandler extends Thread {
 	/**
 	 * Lettura asincrona della risposta del server.
 	 * 
-	 * @author andrea
+	 * @author Andrea Mayer, Emanuele Altomare
 	 *
 	 */
 	private class AsynchronousResponse extends Thread {
 		private IOException lastIOException = null;
+		private ProxyConnectionHandler proxyConnectionHandler = null;
 
 		/**
 		 * Si pone in attesa di risposta da parte del server trasferendo quanto
 		 * letto sulla socket del client.
 		 */
-		public AsynchronousResponse() {
+		public AsynchronousResponse(
+				ProxyConnectionHandler proxyConnectionHandler) {
+			this.proxyConnectionHandler = proxyConnectionHandler;
 			start();
 		}
 
 		@Override
 		public void run() {
 			try {
+
 				/*
-				 * Operazione di log.
+				 * creo l'oggetto che rappresenta il dato all'interno del proxy.
 				 */
-				// log(serverInputStream);
-				if (responseLogger != null) {
-					responseLogger.log();
+				Data response = DataFactory.createData(proxyConnectionHandler,
+						serverInputStream);
+
+				/*
+				 * se è un dato sconosciuto relativo ad un protocollo non
+				 * gestito...
+				 */
+				if (response instanceof UnknownData) {
+
+					/*
+					 * si potrebbe decidere anche di bloccare il traffico di
+					 * protocolli non gestiti dal proxy in questo punto.
+					 */
+
+					/*
+					 * Ottiene la risposta dal server (proxy TOR) e la inoltra
+					 * al client.
+					 */
+					final byte[] bufferServerToClient = new byte[BUFFER_INPUT_STREAM_SIZE_IN_BYTE];
+					int read = -1;
+					while ((read = serverInputStream.read(bufferServerToClient)) != -1) {
+
+						/*
+						 * L'input del serverSocket viene passato alla
+						 * clientSocket
+						 */
+						clientOutputStream.write(bufferServerToClient, 0, read);
+						clientOutputStream.flush();
+					}
 				}
 
 				/*
-				 * Ottiene la risposta dal server (proxy TOR) e la inoltra al
-				 * client.
+				 * applico dei filtri sulla risposta.
 				 */
-				final byte[] bufferServerToClient = new byte[BUFFER_INPUT_STREAM_SIZE_IN_BYTE];
-				int read = -1;
-				while ((read = serverInputStream.read(bufferServerToClient)) != -1) {
-					/*
-					 * L'input del serverSocket viene passato alla clientSocket
-					 */
-					clientOutputStream.write(bufferServerToClient, 0, read);
+				applyResponseFilters(response);
+
+				/*
+				 * invio la risposta al client.
+				 */
+				byte[] responseBytes = response.getDataInBytes();
+				if (responseBytes != null) {
+					clientOutputStream.write(responseBytes);
 					clientOutputStream.flush();
 				}
+
 			} catch (IOException e) {
 				/* Memorizza l'ultima eccezione che è stata sollevata nel run() */
 				lastIOException = e;
@@ -136,50 +172,21 @@ public class ProxyConnectionHandler extends Thread {
 	 */
 	public ProxyConnectionHandler(final WebProxyServer httpProxyServer,
 			final Socket clientSocket) throws IOException {
+		/*
+		 * genero un id random e lo assegno a questa connessione.
+		 */
+		connectionId = UUID.randomUUID();
+
 		this.httpProxyServer = httpProxyServer;
 		this.clientSocket = clientSocket;
 		this.onionBinderService = this.httpProxyServer.getOnionBinderService();
+
 		/*
 		 * Viene avviato il thread che tenta di stabilire la connessione con il
 		 * Proxy TOR; NB: questa operazione può essere anche molto lenta.
 		 */
 		start();
-	}
 
-	/**
-	 * Ottiene il logger per la richiesta.
-	 * 
-	 * @return
-	 */
-	public Logger getLoggerRequest() {
-		return requestLogger;
-	}
-
-	/**
-	 * Imposta il logger per la richiesta.
-	 * 
-	 * @param requestLogger
-	 */
-	public void setLoggerRequest(Logger loggerRequest) {
-		this.requestLogger = loggerRequest;
-	}
-
-	/**
-	 * Ottiene il logger per la risposta.
-	 * 
-	 * @return
-	 */
-	public Logger getLoggerResponse() {
-		return responseLogger;
-	}
-
-	/**
-	 * Imposta il logger per la risposta.
-	 * 
-	 * @param responseLogger
-	 */
-	public void setLoggerResponse(Logger loggerResponse) {
-		this.responseLogger = loggerResponse;
 	}
 
 	/**
@@ -211,6 +218,7 @@ public class ProxyConnectionHandler extends Thread {
 		 */
 		destSocketAddress = (InetSocketAddress) SocketUtils
 				.getDestSockAddress(clientSocket);
+
 		/* Si apre la socket con il Proxy di TOR */
 		proxyServerSocket = new SOCKSSocket(
 				httpProxyServer.getTorSocketAddress());
@@ -262,17 +270,19 @@ public class ProxyConnectionHandler extends Thread {
 	}
 
 	/**
-	 * Inizializzai i logger per la richiesta e la risposta.
+	 * Consente di ottenere l'id della connessione.
+	 * 
+	 * @return
 	 */
-	private void initLogger() {
-		if (clientInputStream != null) {
-			requestLogger = new DefaultLogger(this, clientInputStream,
-					"Request");
-		}
-		if (serverInputStream != null) {
-			responseLogger = new DefaultLogger(this, serverInputStream,
-					"Response");
-		}
+	public UUID getConnectionId() {
+		return connectionId;
+	}
+
+	/**
+	 * setta il logger.
+	 */
+	private void setLogger() {
+		logger = httpProxyServer.getLogger();
 	}
 
 	/**
@@ -299,26 +309,86 @@ public class ProxyConnectionHandler extends Thread {
 	 * @throws IOException
 	 */
 	private void sendRequest() throws IOException {
-		/*
-		 * Operazioni di log.
-		 */
-		// log(clientInputStream);
 
-		if (requestLogger != null) {
-			/* Il logger per la request è stato impostato */
-			requestLogger.log();
+		/*
+		 * creo l'oggetto che rappresenta il dato all'interno del proxy.
+		 */
+		Data request = DataFactory.createData(this, clientInputStream);
+
+		/*
+		 * se è un dato sconosciuto relativo ad un protocollo non gestito dal
+		 * proxy...
+		 */
+		if (request instanceof UnknownData) {
+
+			/*
+			 * si potrebbe decidere anche di bloccare il traffico di protocolli
+			 * non gestiti dal proxy in questo punto.
+			 */
+
+			/*
+			 * Ottiene la risposta dal server (proxy TOR) e la inoltra al
+			 * client.
+			 */
+			final byte[] bufferClientToServer = new byte[BUFFER_INPUT_STREAM_SIZE_IN_BYTE];
+			int read = -1;
+			while ((read = clientInputStream.read(bufferClientToServer)) != -1) {
+				/*
+				 * L'input del serverSocket viene passato alla clientSocket
+				 */
+				serverOutputStream.write(bufferClientToServer, 0, read);
+				serverOutputStream.flush();
+			}
 		}
 
 		/*
-		 * Si inoltra la richiesta al server (proxy TOR).
+		 * applico dei filtri sulla richiesta.
 		 */
-		final byte[] bufferClientToServer = new byte[BUFFER_INPUT_STREAM_SIZE_IN_BYTE];
-		int read = -1;
-		while ((read = clientInputStream.read(bufferClientToServer)) != -1) {
-			/* L'input della clientSocket viene passata alla serverSocket */
-			serverOutputStream.write(bufferClientToServer, 0, read);
+		applyRequestFilters(request);
+
+		/*
+		 * trasmetto la richiesta al server TOR.
+		 */
+		byte[] requestBytes = request.getDataInBytes();
+		if (requestBytes != null) {
+			serverOutputStream.write(requestBytes);
 			serverOutputStream.flush();
 		}
+
+	}
+
+	/**
+	 * Qui dentro possono essere inserite le chiamate ai vari filtri da
+	 * applicare sul dato della richiesta.
+	 * 
+	 * @param request
+	 */
+	private void applyRequestFilters(Data request) {
+		if (request == null) {
+			return;
+		}
+
+		/*
+		 * effettua l'operazione di log.
+		 */
+		request.log(logger);
+	}
+
+	/**
+	 * Qui dentro possono essere inserite le chiamate ai vari filtri da
+	 * applicare sul dato della richiesta.
+	 * 
+	 * @param request
+	 */
+	private void applyResponseFilters(Data response) {
+		if (response == null) {
+			return;
+		}
+
+		/*
+		 * effettua l'operazione di log.
+		 */
+		response.log(logger);
 	}
 
 	/**
@@ -329,19 +399,13 @@ public class ProxyConnectionHandler extends Thread {
 	 * @throws InterruptedException
 	 */
 	private void socketSplice() throws IOException, InterruptedException {
-		/*
-		 * TODO: Per migliorare le performance i log dovrebbero essere inseriti
-		 * all'interno di una struttura dati e poi un thread scansiona la
-		 * struttura dati e rende peristenti su file i log. In questo modo si
-		 * disaccoppia la gestion del log da quella di invio/ricezione dei dati
-		 * da e verso la destinazione.
-		 */
 
 		/*
 		 * Avvio la lettura asincrona della risposta del server in modo tale da
 		 * sfruttare la bidirezionalità del collegamento
 		 */
-		final AsynchronousResponse asynchronousResponse = new AsynchronousResponse();
+		final AsynchronousResponse asynchronousResponse = new AsynchronousResponse(
+				this);
 
 		/*
 		 * Invia la richiesta dalla socket del client a quella del server per
@@ -358,12 +422,12 @@ public class ProxyConnectionHandler extends Thread {
 	@Override
 	public void run() {
 		try {
+			/* Setta il logger */
+			setLogger();
 			/* Stabilisce la connessione con il proxy di TOR */
 			torConnect();
 			/* Apre gli streams */
 			openStreams();
-			/* Imposta i logger */
-			initLogger();
 			/* Scambio dei dati */
 			socketSplice();
 		} catch (IOException e) {
@@ -372,7 +436,20 @@ public class ProxyConnectionHandler extends Thread {
 			e.printStackTrace();
 		} finally {
 			/* chiusura degli streams e delle socket */
+			doSomeFinalOperations();
 			closeAllQuitely();
 		}
+	}
+
+	/**
+	 * Consente di eseguire delle operazioni alla fine, poco prima che la
+	 * connessione venga chiusa.
+	 */
+	private void doSomeFinalOperations() {
+		/*
+		 * faccio sapere al logger che la connessione sta per essere chiusa.
+		 */
+		logger.closingConnection(this);
+
 	}
 }
