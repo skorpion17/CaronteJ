@@ -364,17 +364,21 @@ public class HttpUtils {
 			throw new IOException("The input stream is null.");
 		}
 
+		if (contentLength == null) {
+			throw new IOException("Content-Length is null.");
+		}
+
 		/*
-		 * se l'header Content-Length non esiste oppure il valore è vuoto oppure
-		 * il valore non è un intero...
+		 * se il valore dell'header Content-Length è vuoto oppure il valore non
+		 * è un intero...
 		 */
-		if (!(contentLength != null && !contentLength.isEmpty() && contentLength
-				.matches("[0-9]*"))) {
+
+		if (contentLength.isEmpty() && !contentLength.matches("[0-9]*")) {
 
 			/*
 			 * lancio l'eccezione.
 			 */
-			throw new HttpException("Content-Length not found or malformed.");
+			throw new HttpException("Content-Length value is malformed.");
 		}
 
 		/*
@@ -384,9 +388,11 @@ public class HttpUtils {
 		body = new byte[size];
 
 		/*
-		 * leggo dall'input stream i byte del body
+		 * leggo dall'input stream i bytes del body
 		 */
-		inputStream.read(body, 0, size);
+		for (int i = 0; i < size; ++i) {
+			body[i] = (byte) inputStream.read();
+		}
 
 		return body;
 	}
@@ -521,9 +527,9 @@ public class HttpUtils {
 	 *             se il protocollo non è supportato o è in un formato non
 	 *             comprensibile.
 	 */
-	public static String getSupportedHttpVersionByStartLine(String startLine,
-			HttpPacketType httpPacketType) throws HttpNullStartLineException,
-			HttpVersionNotSupportedException {
+	public static String getSupportedHttpVersionByStartLineString(
+			String startLine, HttpPacketType httpPacketType)
+			throws HttpNullStartLineException, HttpVersionNotSupportedException {
 
 		if (startLine == null) {
 			throw new HttpNullStartLineException("The start-line is null!");
@@ -532,22 +538,47 @@ public class HttpUtils {
 		String httpVersion = null;
 
 		/*
+		 * splitto la linea in elementi.
+		 */
+		String[] elements = startLine.split(" ");
+
+		/*
+		 * se gli elementi sono meno di 3...
+		 */
+		if (elements.length < 3) {
+
+			/*
+			 * quella in uso non è una versione di protocollo HTTP supportata,
+			 * poichè in HTTP/1.[01] la start-line deve avere 3 campi. Lancio
+			 * un'eccezione.
+			 */
+			throw new HttpVersionNotSupportedException(
+					"The elements of start-line are less then expected.");
+		}
+
+		/*
 		 * assegno la posizione del campo realativo al protocollo HTTP sulla
 		 * start-line in base al tipo di pacchetto HTTP.
 		 */
 		switch (httpPacketType) {
 		case REQUEST:
+
+			/*
+			 * l'elemento che si riferisce al protocollo è il terzo.
+			 */
 			httpVersionStringPositionOnStartLine = 2;
 			break;
-		case RESPONSE:
 		default:
+		case RESPONSE:
+
+			/*
+			 * l'elemento che si riferisce al protocollo è il primo.
+			 */
 			httpVersionStringPositionOnStartLine = 0;
 		}
 
-		String[] elements = startLine.split(" ");
-
 		/*
-		 * prendo il primo elemento della start-line che forse è relativo ad un
+		 * prendo l'elemento della start-line che forse è relativo ad un
 		 * protocollo HTTP supportato.
 		 */
 		String aMaybeSupportedHttpVersion = elements[httpVersionStringPositionOnStartLine]

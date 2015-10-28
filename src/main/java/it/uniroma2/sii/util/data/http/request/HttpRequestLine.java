@@ -104,7 +104,7 @@ public class HttpRequestLine extends HttpStartLine {
 	@Override
 	protected void makeHttpVersion() throws HttpException {
 		String supportedHttpVersion = HttpUtils
-				.getSupportedHttpVersionByStartLine(startLine,
+				.getSupportedHttpVersionByStartLineString(startLine,
 						HttpUtils.HttpPacketType.REQUEST);
 		if (supportedHttpVersion == null) {
 			throw new HttpVersionNotSupportedException(supportedHttpVersion);

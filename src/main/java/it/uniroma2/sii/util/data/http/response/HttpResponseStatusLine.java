@@ -103,7 +103,7 @@ public class HttpResponseStatusLine extends HttpStartLine {
 	@Override
 	protected void makeHttpVersion() throws HttpException {
 		String supportedHttpVersion = HttpUtils
-				.getSupportedHttpVersionByStartLine(startLine,
+				.getSupportedHttpVersionByStartLineString(startLine,
 						HttpUtils.HttpPacketType.RESPONSE);
 		if (supportedHttpVersion == null) {
 			throw new HttpVersionNotSupportedException(supportedHttpVersion);

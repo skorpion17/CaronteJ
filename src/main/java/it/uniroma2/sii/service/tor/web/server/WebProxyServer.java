@@ -89,6 +89,7 @@ public class WebProxyServer extends Thread {
 				/* Per ogni connessione in arrivo */
 				try {
 					final Socket clientSocket = serverSocket.accept();
+
 					/*
 					 * Gestisce la nuova connessione in arrivo
 					 */

@@ -194,6 +194,12 @@ public class FileLogger extends LoggerAbstract {
 									fileWriter.write(String.format(
 											"Verso: %s\n",
 											responseHeader.get("Location")));
+									fileWriter
+											.write(String.format(
+													"Body:\n%s\n",
+													new String(response
+															.getMessageBody(),
+															"ASCII")));
 									fileWriter.write(separator);
 
 									fileWriter.flush();

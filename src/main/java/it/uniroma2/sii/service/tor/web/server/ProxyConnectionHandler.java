@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.UUID;
 
 /**
@@ -90,59 +91,101 @@ public class ProxyConnectionHandler extends Thread {
 
 		@Override
 		public void run() {
-			try {
-
-				/*
-				 * creo l'oggetto che rappresenta il dato all'interno del proxy.
-				 */
-				Data response = DataFactory.createData(proxyConnectionHandler,
-						serverInputStream);
-
-				/*
-				 * se è un dato sconosciuto relativo ad un protocollo non
-				 * gestito...
-				 */
-				if (response instanceof UnknownData) {
+			while (true) {
+				try {
 
 					/*
-					 * si potrebbe decidere anche di bloccare il traffico di
-					 * protocolli non gestiti dal proxy in questo punto.
+					 * setto il marcatore per un solo byte.
 					 */
+					serverInputStream.mark(1);
 
 					/*
-					 * Ottiene la risposta dal server (proxy TOR) e la inoltra
-					 * al client.
+					 * vedo se esiste un altro byte da leggere.
 					 */
-					final byte[] bufferServerToClient = new byte[BUFFER_INPUT_STREAM_SIZE_IN_BYTE];
-					int read = -1;
-					while ((read = serverInputStream.read(bufferServerToClient)) != -1) {
+					final int thereIsAnotherByte = serverInputStream
+							.read(new byte[1]);
+
+					/*
+					 * resetto lo stream.
+					 */
+					serverInputStream.reset();
+
+					/*
+					 * se non esiste...
+					 */
+					if (thereIsAnotherByte == -1) {
 
 						/*
-						 * L'input del serverSocket viene passato alla
-						 * clientSocket
+						 * esco dal ciclo.
 						 */
-						clientOutputStream.write(bufferServerToClient, 0, read);
+						break;
+					}
+
+					/*
+					 * creo l'oggetto che rappresenta il dato all'interno del
+					 * proxy.
+					 */
+					Data response = DataFactory.createData(
+							proxyConnectionHandler, serverInputStream);
+
+					/*
+					 * se è un dato sconosciuto relativo ad un protocollo non
+					 * gestito...
+					 */
+					if (response instanceof UnknownData) {
+
+						/*
+						 * si potrebbe decidere anche di bloccare il traffico di
+						 * protocolli non gestiti dal proxy in questo punto.
+						 */
+
+						/*
+						 * Ottiene la risposta dal server (proxy TOR) e la
+						 * inoltra al client.
+						 */
+						final byte[] bufferServerToClient = new byte[BUFFER_INPUT_STREAM_SIZE_IN_BYTE];
+						int read = -1;
+						while ((read = serverInputStream
+								.read(bufferServerToClient)) != -1) {
+
+							/*
+							 * L'input del serverSocket viene passato alla
+							 * clientSocket
+							 */
+							clientOutputStream.write(bufferServerToClient, 0,
+									read);
+							clientOutputStream.flush();
+						}
+					}
+
+					/*
+					 * applico dei filtri sulla risposta.
+					 */
+					applyResponseFilters(response);
+
+					/*
+					 * invio la risposta al client.
+					 */
+					byte[] responseBytes = response.getDataInBytes();
+					if (responseBytes != null) {
+						clientOutputStream.write(responseBytes);
 						clientOutputStream.flush();
 					}
+				} catch (SocketTimeoutException e) {
+
+					/*
+					 * se si blocca sul read dopo 5 secondi la socket scade,
+					 * quindi esco dal ciclo e non riporto l'eccezione.
+					 */
+					break;
+				} catch (IOException e) {
+
+					/*
+					 * Memorizza l'ultima eccezione che è stata sollevata nel
+					 * run()
+					 */
+					lastIOException = e;
 				}
-
-				/*
-				 * applico dei filtri sulla risposta.
-				 */
-				applyResponseFilters(response);
-
-				/*
-				 * invio la risposta al client.
-				 */
-				byte[] responseBytes = response.getDataInBytes();
-				if (responseBytes != null) {
-					clientOutputStream.write(responseBytes);
-					clientOutputStream.flush();
-				}
-
-			} catch (IOException e) {
-				/* Memorizza l'ultima eccezione che è stata sollevata nel run() */
-				lastIOException = e;
 			}
 		}
 
@@ -222,6 +265,12 @@ public class ProxyConnectionHandler extends Thread {
 		/* Si apre la socket con il Proxy di TOR */
 		proxyServerSocket = new SOCKSSocket(
 				httpProxyServer.getTorSocketAddress());
+
+		/*
+		 * setto un timeout di 5 secondi per la socket verso TOR.
+		 */
+		proxyServerSocket.setSoTimeout(5000);
+
 		/* .onion */
 		if (onionBinderService
 				.isInetAddressForInternalOnionResolution(destSocketAddress
@@ -408,10 +457,43 @@ public class ProxyConnectionHandler extends Thread {
 				this);
 
 		/*
-		 * Invia la richiesta dalla socket del client a quella del server per
+		 * Invia le richieste dalla socket del client a quella del server per
 		 * utilizzare la rete TOR
 		 */
-		sendRequest();
+		while (true) {
+
+			/*
+			 * setto il marcatore per un solo byte.
+			 */
+			clientInputStream.mark(1);
+
+			/*
+			 * vedo se esiste un altro byte da leggere.
+			 */
+			final int thereIsAnotherByte = clientInputStream.read(new byte[1]);
+
+			/*
+			 * resetto lo stream.
+			 */
+			clientInputStream.reset();
+
+			/*
+			 * se non esiste...
+			 */
+			if (thereIsAnotherByte == -1) {
+
+				/*
+				 * esco dal ciclo.
+				 */
+				break;
+			}
+
+			/*
+			 * invio la richiesta al server TOR.
+			 */
+			sendRequest();
+		}
+
 		/*
 		 * Attende che sia arrivata tutta la risposta dal server, avendola gia
 		 * rigiratà opportunamente sulla socket del client

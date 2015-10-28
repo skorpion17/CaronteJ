@@ -127,7 +127,7 @@ public class HttpDataFactory {
 		/*
 		 * vedo se la versione di HTTP è supportata e la prendo.
 		 */
-		supportedHttpVersion = HttpUtils.getSupportedHttpVersionByStartLine(
+		supportedHttpVersion = HttpUtils.getSupportedHttpVersionByStartLineString(
 				requestLineString, HttpUtils.HttpPacketType.REQUEST);
 
 		/*
@@ -216,7 +216,7 @@ public class HttpDataFactory {
 		/*
 		 * vedo se la versione HTTP è supportata e la prendo.
 		 */
-		supportedHttpVersion = HttpUtils.getSupportedHttpVersionByStartLine(
+		supportedHttpVersion = HttpUtils.getSupportedHttpVersionByStartLineString(
 				statusLineString, HttpUtils.HttpPacketType.RESPONSE);
 
 		/*
