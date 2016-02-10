@@ -3,11 +3,14 @@ package it.uniroma2.sii.service.tor.dns.server;
 import it.uniroma2.sii.model.OnionBinder;
 import it.uniroma2.sii.repository.OnionBinderRepository;
 import it.uniroma2.sii.service.tor.dns.TorResolverService;
+import it.uniroma2.sii.sock.SOCKSSocket;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
@@ -44,6 +47,17 @@ public class TorDNSServer extends Thread {
 	@Value("${dns.tor.bind.port}")
 	private int dnsTorBindPort;
 
+	/**
+	 * Indirizzo su cui il proxy di TOR è in ascolto
+	 */
+	@Value("${proxy.tor.bind.address}")
+	private String proxyTorBindAddress;
+	/**
+	 * Porta su cui il proxy di TOR è in ascolto
+	 */
+	@Value("${proxy.tor.bind.port}")
+	private int proxyTorBindPort;
+
 	private DatagramSocket datagramSocket;
 
 	/** Non puo essere avviato per piu di una volta il server */
@@ -72,6 +86,34 @@ public class TorDNSServer extends Thread {
 		}
 
 		/**
+		 * Ottiene l'indirizzo presso cui il server di tor è in ascoto.
+		 * 
+		 * @return
+		 */
+		private InetSocketAddress getTorSocketAddress() {
+			return InetSocketAddress.createUnresolved(proxyTorBindAddress,
+					proxyTorBindPort);
+		}
+
+		/**
+		 * TODO test
+		 * 
+		 * @param onion
+		 * @throws IOException
+		 */
+		private void checkIfOnionExists(final String onion) throws IOException {
+			final Socket socket = new SOCKSSocket(getTorSocketAddress());
+			try {
+				socket.setSoTimeout(50000);
+				InetSocketAddress inetSockAddress = InetSocketAddress
+						.createUnresolved(onion, 80);
+				socket.connect(inetSockAddress);
+			} finally {
+				socket.close();
+			}
+		}
+
+		/**
 		 * Genera il pacchetto contenete la risposta alla richiesta DNS.
 		 * 
 		 * @param dnsRequestPacket
@@ -87,33 +129,52 @@ public class TorDNSServer extends Thread {
 			final Name hostname = question.getName();
 			final String host = hostname.toString(true);
 
-			InetAddress inetAddress;
+			boolean reply = true;
+			InetAddress inetAddress = null;
 			/* Si verifica che l'hostname non sia un .onion */
 			if (host.matches(SUFFIX_REGEX_ONION)) {
-				/*
-				 * Se l'hostname è un .onion allora deve essere utilizzato un
-				 * meccanismo di risoluzione interna che associa questo onion ad
-				 * un indirizzo privato; successivamente quando verrà richieta
-				 * la connessinoe http(s) si andrà alla ricerca della
-				 * risoluzione interna.
-				 */
-				final OnionBinder onionBinder = onionBinderRepository
-						.registerOnionByName(host);
-				/* Ottiene l'indirizzo locale utilizzato per risolvere il .onion */
-				inetAddress = onionBinder.getInetAddress();
+				do {
+					try {
+						checkIfOnionExists(host);
+					} catch (final IOException ioe) {
+						reply = false;
+						break;
+					}
+					/*
+					 * Se l'hostname è un .onion allora deve essere utilizzato
+					 * un meccanismo di risoluzione interna che associa questo
+					 * onion ad un indirizzo privato; successivamente quando
+					 * verrà richieta la connessinoe http(s) si andrà alla
+					 * ricerca della risoluzione interna.
+					 */
+					final OnionBinder onionBinder = onionBinderRepository
+							.registerOnionBinderByNameWithExpirationTime(host);
+					/*
+					 * Ottiene l'indirizzo locale utilizzato per risolvere il
+					 * .onion
+					 */
+					inetAddress = onionBinder.getInetAddress();
+				} while (false);
 			} else {
 				/* E' un hostname canonico, lo risolvo attraverso TOR. */
 				inetAddress = torResolverService.resolveDNS(host);
 			}
 
-			/* Creo il record di risposta */
-			final ARecord dnsAnswer = new ARecord(hostname, 1, 86400,
-					inetAddress);
-			message.addRecord(dnsAnswer, Section.ANSWER);
-
-			System.out
-					.printf("\t >>> TorDNSRequestHandler replied to Client with: <<<\n",
-							inetAddress);
+			if (reply) {
+				/*
+				 * Creo il record di risposta se l'onion esiste e raggiungibile,
+				 * altrimenti rispondo con un record vuoto.
+				 */
+				final ARecord dnsAnswer = new ARecord(hostname, 1, 86400,
+						inetAddress);
+				message.addRecord(dnsAnswer, Section.ANSWER);
+				System.out
+						.printf("\t >>> TorDNSRequestHandler replied to Client with: %s <<<\n",
+								inetAddress.getHostAddress());
+			} else {
+				System.out.printf("\t >>> TorDNS cannot resolve %s <<< \n",
+						host);
+			}
 			/*
 			 * Creo il datagramma di risposta
 			 */

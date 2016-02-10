@@ -3,11 +3,14 @@ package it.uniroma2.sii.model;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 /**
  * OnionBinder permette di tenere accoppiato un indirizzp IPv4 ad un .onion per
@@ -23,6 +26,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = OnionBinder.ONION_BINDER_TABLE)
 public class OnionBinder {
+	private static final int IPV4_INT_MASK = 0xffffffff;
 	public static final String ONION_BINDER_TABLE = "OnionBinder";
 	public static final String ONION_BINDER_ADDRESS_FIELD_NAME = "address";
 
@@ -30,10 +34,12 @@ public class OnionBinder {
 	@Column(name = ONION_BINDER_ADDRESS_FIELD_NAME)
 	private int address;
 	private String onionName;
-
-	// TODO: AGGIUNGERE CAMPO PER IL TIMESTAMP PER LA CREAZIONE DI UN
-	// ONION_BINDER. IN QUESTO MODO SI PUÒ DECIDERE SE CACHARE PER UN CERTO
-	// PERIODO DI TEMPO OPPURE NO.
+	/**
+	 * Timestamp per gestire la scandenza delle risoluzioni tra
+	 * ip_privato_loopback <=> .onion
+	 */
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date expirationTimestamp;
 
 	/**
 	 * Costruttore.
@@ -59,7 +65,7 @@ public class OnionBinder {
 	/**
 	 * @return the address
 	 */
-	public long getAddress() {
+	public int getAddress() {
 		return address;
 	}
 
@@ -67,8 +73,17 @@ public class OnionBinder {
 	 * @param address
 	 *            the address to set
 	 */
-	public void setAddress(int address) {
-		this.address = address;
+	public void setAddress(final int address) {
+		this.address = IPV4_INT_MASK & address;
+	}
+
+	/**
+	 * Aggiorna il valore di {@link OnionBinder#expirationTimestamp} con il
+	 * valore del tempo attuale + il tempo di expiration.
+	 */
+	public void updateExpirationTimestamp(final int relativeTimeInMillis) {
+		setExpirationTimestamp(new Date(System.currentTimeMillis()
+				+ relativeTimeInMillis));
 	}
 
 	/**
@@ -78,8 +93,26 @@ public class OnionBinder {
 	 * @throws UnknownHostException
 	 */
 	public InetAddress getInetAddress() throws UnknownHostException {
-		final int ipAddress = (int) (getAddress());
+		final int ipAddress = (int) (IPV4_INT_MASK & (getAddress()));
 		final byte[] bytes = BigInteger.valueOf(ipAddress).toByteArray();
 		return InetAddress.getByAddress(bytes);
+	}
+
+	/**
+	 * Ottiene il tempo di scadenza del {@link OnionBinder} corrente.
+	 * 
+	 * @return
+	 */
+	public Date getExpirationTimestamp() {
+		return expirationTimestamp;
+	}
+
+	/**
+	 * Imposta il tempo di scadenza per {@link OnionBinder} corrente.
+	 * 
+	 * @param expirationTimestamp
+	 */
+	public void setExpirationTimestamp(Date expirationTimestamp) {
+		this.expirationTimestamp = expirationTimestamp;
 	}
 }

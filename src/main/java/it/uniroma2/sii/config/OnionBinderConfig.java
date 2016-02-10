@@ -48,4 +48,18 @@ public interface OnionBinderConfig {
 	 * @return
 	 */
 	public int getOnionBinderAddressIncrement();
+
+	/**
+	 * Ottiene il numero di bit della netmask.
+	 * 
+	 * @return
+	 */
+	public int getOnionBinderNumberBitOfNetmask();
+
+	/**
+	 * Ottiene il tempo di scadenza relativa di un OnionBinder.
+	 * 
+	 * @return
+	 */
+	public int getOnionBinderRelativeExpirationTimeInMillis();
 }

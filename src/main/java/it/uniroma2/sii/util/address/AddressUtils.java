@@ -1,6 +1,8 @@
 package it.uniroma2.sii.util.address;
 
+import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 /**
@@ -117,6 +119,20 @@ public class AddressUtils {
 	 */
 	public static int fromInetAddressToIntIPv4(final InetAddress address) {
 		return ByteBuffer.wrap(address.getAddress()).getInt();
+	}
+
+	/**
+	 * Permette di ottenere un {@link InetAddress} a partire da {@link Integer}
+	 * {@code ipv4}.
+	 * 
+	 * @param ipv4
+	 * @return
+	 * @throws UnknownHostException
+	 */
+	public static InetAddress fromIntIPv4ToInetaddress(final int ipv4)
+			throws UnknownHostException {
+		byte[] bytes = BigInteger.valueOf(ipv4).toByteArray();
+		return InetAddress.getByAddress(bytes);
 	}
 
 	/**

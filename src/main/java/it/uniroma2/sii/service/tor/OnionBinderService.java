@@ -5,6 +5,7 @@ import it.uniroma2.sii.model.OnionBinder;
 import it.uniroma2.sii.repository.OnionBinderRepository;
 import it.uniroma2.sii.util.address.AddressUtils;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -13,6 +14,11 @@ import java.net.UnknownHostException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * 
+ * @author andrea
+ *
+ */
 @Service
 public class OnionBinderService {
 	@Autowired
@@ -26,10 +32,10 @@ public class OnionBinderService {
 	 * 
 	 * @param socketAddress
 	 * @return
-	 * @throws UnknownHostException
+	 * @throws IOException
 	 */
 	public SocketAddress resolveCachedOnionNameByInternalInetSocketAddress(
-			final InetSocketAddress socketAddress) throws UnknownHostException {
+			final InetSocketAddress socketAddress) throws IOException {
 		/*
 		 * Ottiene la notazione in intero (network-byte-order) dell'indirizzo
 		 * ipv4 specificato in {@code socketAddress}
@@ -37,7 +43,7 @@ public class OnionBinderService {
 		final int resolvedInternalIp = AddressUtils
 				.fromInetAddressToIntIPv4(socketAddress.getAddress());
 		final OnionBinder onionBinder = onionBinderRepository
-				.findOne(resolvedInternalIp);
+				.findOnionBindByAddressAndDoCacheRefreshing(resolvedInternalIp);
 		if (onionBinder == null) {
 			/* Ritorna errore */
 			throw new UnknownHostException(String.format(
@@ -70,5 +76,23 @@ public class OnionBinderService {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Permette di registrare un {@link OnionBinder} attraverso il
+	 * {@code onionName} all'interno dello strato di storage. Una volta
+	 * registrato a questo .onion viene associato un ip locale privato che verrà
+	 * utilizzato dalle applicazioni per accedere in modo trasparente al hidden
+	 * server. La traduzione tra ip privato locale e hidden service viene
+	 * attuata dal proxy.
+	 * 
+	 * @param onionName
+	 * @return
+	 * @throws IOException
+	 */
+	public OnionBinder registerOnionByName(final String onionName)
+			throws IOException {
+		return onionBinderRepository
+				.registerOnionBinderByNameWithExpirationTime(onionName);
 	}
 }

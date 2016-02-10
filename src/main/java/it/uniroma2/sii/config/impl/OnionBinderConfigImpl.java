@@ -24,11 +24,19 @@ public class OnionBinderConfigImpl implements OnionBinderConfig {
 	@Value("${onion.binder.address.increment}")
 	private String onionBinderAddressIncrement;
 
+	@Value("${onion.binder.expirationtimemillisec}")
+	private int expirationTimeInMillis;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see it.uniroma2.sii.config.OnionBinderConfig#getAddressIPv4Mask()
+	 */
+	@Override
 	public int getAddressIPv4Mask() {
 		return 0xffffffff;
 	}
 
-	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -40,7 +48,6 @@ public class OnionBinderConfigImpl implements OnionBinderConfig {
 				.fromDotDecimalToIntIPv4(onionBinderAddressStartFrom);
 	}
 
-	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -52,7 +59,17 @@ public class OnionBinderConfigImpl implements OnionBinderConfig {
 				.parseInt(onionBinderAddressNetmask)));
 	}
 
-	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * it.uniroma2.sii.config.OnionBinderConfig#getOnoinBinderNoOfBitNetmask()
+	 */
+	@Override
+	public int getOnionBinderNumberBitOfNetmask() {
+		return Integer.parseInt(onionBinderAddressNetmask);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -63,7 +80,6 @@ public class OnionBinderConfigImpl implements OnionBinderConfig {
 		return AddressUtils.fromDotDecimalToIntIPv4(onionBinderAddressSubnet);
 	}
 
-	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -72,5 +88,17 @@ public class OnionBinderConfigImpl implements OnionBinderConfig {
 	 */
 	public int getOnionBinderAddressIncrement() {
 		return Integer.parseInt(onionBinderAddressIncrement);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * it.uniroma2.sii.config.OnionBinderConfig#getRelativeExpirationTimeInMillis
+	 * ()
+	 */
+	@Override
+	public int getOnionBinderRelativeExpirationTimeInMillis() {
+		return expirationTimeInMillis;
 	}
 }
