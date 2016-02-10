@@ -184,7 +184,7 @@ public class FileLogger extends LoggerAbstract {
 									separator = "\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n";
 									fileWriter.write(separator);
 									fileWriter
-											.write("ATTENZIONE!!! C'è stato un pericolosissimo redirect!\n");
+											.write("ATTENZIONE!!! REDIRECT:\n");
 									fileWriter.write(String.format(
 											"Codice di stato: %s\n",
 											responseStatusCodeString));
