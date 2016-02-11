@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
  * 
  * @author Emanuele Altomare
  */
-@Component
 public class HttpDataFactory {
 
 	/**

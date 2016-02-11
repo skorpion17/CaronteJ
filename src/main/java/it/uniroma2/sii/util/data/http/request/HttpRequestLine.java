@@ -19,7 +19,7 @@ import java.net.URISyntaxException;
 public class HttpRequestLine extends HttpStartLine {
 
 	String method = null;
-	URI requestUri = null;
+	URI requestResource = null;
 
 	public HttpRequestLine() {
 		super();
@@ -54,14 +54,14 @@ public class HttpRequestLine extends HttpStartLine {
 	 * 
 	 * @throws URISyntaxException
 	 */
-	private void makeRequestUri() throws URISyntaxException {
+	private void makeRequestResource() throws URISyntaxException {
 
 		String[] elements = startLine.split(" ");
 
 		/*
 		 * creo un nuovo oggetto URI e lo assegno.
 		 */
-		requestUri = new URI(elements[1].trim());
+		requestResource = new URI(elements[1].trim());
 	}
 
 	/**
@@ -94,11 +94,11 @@ public class HttpRequestLine extends HttpStartLine {
 	 * @return
 	 * @throws URISyntaxException
 	 */
-	public URI getRequestUri() throws URISyntaxException {
-		if (requestUri == null) {
-			makeRequestUri();
+	public URI getRequestResource() throws URISyntaxException {
+		if (requestResource == null) {
+			makeRequestResource();
 		}
-		return requestUri;
+		return requestResource;
 	}
 
 	@Override
