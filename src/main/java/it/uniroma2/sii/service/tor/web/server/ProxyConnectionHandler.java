@@ -5,6 +5,7 @@ import it.uniroma2.sii.service.tor.OnionBinderService;
 import it.uniroma2.sii.sock.SOCKSSocket;
 import it.uniroma2.sii.util.data.Data;
 import it.uniroma2.sii.util.data.DataFactory;
+import it.uniroma2.sii.util.data.Filter;
 import it.uniroma2.sii.util.data.unknown.UnknownData;
 import it.uniroma2.sii.util.io.IOUtils;
 import it.uniroma2.sii.util.socket.SocketUtils;
@@ -429,7 +430,7 @@ public class ProxyConnectionHandler extends Thread {
 	 * 
 	 * @param request
 	 */
-	private void applyResponseFilters(Data response) {
+	private void applyResponseFilters(Filter response) {
 		if (response == null) {
 			return;
 		}
