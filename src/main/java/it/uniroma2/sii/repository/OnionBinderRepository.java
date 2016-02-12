@@ -19,8 +19,23 @@ import org.springframework.transaction.annotation.Transactional;
 public interface OnionBinderRepository extends
 		CrudRepository<OnionBinder, Integer>, OnionBinderRepositoryCustom {
 
+	/**
+	 * Ottiene {@link OnionBinder} attraverso il suo URL {@link onionName}.
+	 * 
+	 * @param onionName
+	 * @return
+	 */
+	@Transactional
 	public OnionBinder findByOnionName(final String onionName);
 
+	/**
+	 * Ottiene {@link OnionBinder} attraverso il suo indirizzo ip associato
+	 * durante la risoluzione interna.
+	 * 
+	 * @param address
+	 * @return
+	 */
+	@Transactional
 	public OnionBinder findByAddress(final int address);
 
 	/**

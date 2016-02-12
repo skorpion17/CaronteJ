@@ -6,6 +6,7 @@ import it.uniroma2.sii.repository.exception.NoMoreOnionBinderAddressAvailableExc
 import java.io.IOException;
 
 /**
+ * Repository custom per {@link OnionBinder}.
  * 
  * @author andrea
  *
@@ -30,14 +31,24 @@ public interface OnionBinderRepositoryCustom {
 	/**
 	 * Permette di ottenere un oggetto {@link OnionBinder} identificato da
 	 * {@code ipv4} se presente nello strato di storage. Inoltre questo metodo
-	 * una volta chiamato va ad aggiornare il contenuto della cach rimuovendo le
-	 * coppie <address,onoin> scadute e facendo il refresh di quella a cui
+	 * una volta chiamato va ad aggiornare il contenuto della cache rimuovendo
+	 * le coppie <address,onoin> scadute e facendo il refresh di quella a cui
 	 * l'eventuale onion recuperato si riferisce.
 	 * 
 	 * @param ipv4
 	 * @return
 	 * @throws IOException
 	 */
-	public OnionBinder findOnionBindByAddressAndDoCacheRefreshing(int ipv4)
+	public OnionBinder findOnionBindByAddressAndDoCacheRefreshing(final int ipv4)
 			throws IOException;
+
+	/**
+	 * Verifica se {@link OnionBinder} {@code onion} esiste senza rinfrescare il
+	 * suo expiration_time.
+	 * 
+	 * @param onion
+	 * @return
+	 */
+	public boolean checkIfOnionBinderExistsWithoutCacheRefreshing(
+			final String onion);
 }

@@ -13,8 +13,6 @@ import it.uniroma2.sii.util.data.http.response.HttpResponseStatusLine;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.springframework.stereotype.Component;
-
 /**
  * Ha il compito di creare gli oggetti HttpData.
  * 

@@ -57,12 +57,19 @@ public class TorDNSServer extends Thread {
 	 */
 	@Value("${proxy.tor.bind.port}")
 	private int proxyTorBindPort;
+	/**
+	 * Per contattare gli onioni si prova sulle porte dei servizi HTTP e HTTPS.
+	 */
+	@Value("${http.service.ports}")
+	private int[] onionServicePort;
 
 	private DatagramSocket datagramSocket;
 
 	/** Non puo essere avviato per piu di una volta il server */
 	private Object lock = new Object();
 	private boolean started = false;
+
+	private final int ONION_CONNECT_TIMEOUT_IN_MILLIS = 10000;
 
 	/**
 	 * Gestore delle richieste di risoluzione dei nomi inoltrate al server.
@@ -96,20 +103,57 @@ public class TorDNSServer extends Thread {
 		}
 
 		/**
-		 * TODO test
+		 * Prova a connettersi all'onion per verificare se esiste e se risulta
+		 * raggiungibile.
 		 * 
 		 * @param onion
 		 * @throws IOException
 		 */
-		private void checkIfOnionExists(final String onion) throws IOException {
-			final Socket socket = new SOCKSSocket(getTorSocketAddress());
-			try {
-				socket.setSoTimeout(50000);
-				InetSocketAddress inetSockAddress = InetSocketAddress
-						.createUnresolved(onion, 80);
-				socket.connect(inetSockAddress);
-			} finally {
-				socket.close();
+		private void checkIfOnionExistsAndIsReachable(final String onion)
+				throws IOException {
+			if (onionBinderRepository
+					.checkIfOnionBinderExistsWithoutCacheRefreshing(onion)) {
+				/*
+				 * L'onion è stato raggiunto almeno una volta nell'ultimo
+				 * nell'ultimo intervallo di tempo prima della scadenza del suo
+				 * expiration_time; per questo motivo è un .onion ritenuto
+				 * raggiungibile e pertanto non si effettua nessun check sulla
+				 * sua raggiungibilità.
+				 */
+				return;
+			}
+			boolean isReachable = false;
+			for (int i = 0; i < onionServicePort.length; ++i) {
+				/*
+				 * Per ogni porta su cui può essere in ascolto un servizio
+				 * onion.
+				 */
+				final Socket socket = new SOCKSSocket(getTorSocketAddress());
+				try {
+					socket.setSoTimeout(ONION_CONNECT_TIMEOUT_IN_MILLIS);
+					InetSocketAddress inetSockAddress = InetSocketAddress
+							.createUnresolved(onion, onionServicePort[i]);
+					socket.connect(inetSockAddress);
+					/*
+					 * Se sono arrivato fin qui, la connessione con l'onion è
+					 * andata a buon fine, posso terminare e ritornare la
+					 * disponibilità.
+					 */
+					isReachable = true;
+					break;
+				} catch (final IOException ioe) {
+					/* Non devo stampare nulla per ora. */
+				} finally {
+					socket.close();
+				}
+			}
+			if (!isReachable) {
+				/*
+				 * Se non è mai stato possibile raggiungere il .onion lancio
+				 * l'eccezione.
+				 */
+				throw new SocketException(
+						String.format("%s is not reachable at this moment, please try later."));
 			}
 		}
 
@@ -129,20 +173,19 @@ public class TorDNSServer extends Thread {
 			final Name hostname = question.getName();
 			final String host = hostname.toString(true);
 
-			boolean reply = true;
+			boolean createARecord = true;
 			InetAddress inetAddress = null;
 			/* Si verifica che l'hostname non sia un .onion */
 			if (host.matches(SUFFIX_REGEX_ONION)) {
-				do {
-					try {
-						checkIfOnionExists(host);
-					} catch (final IOException ioe) {
-						reply = false;
-						break;
-					}
+				try {
 					/*
-					 * Se l'hostname è un .onion allora deve essere utilizzato
-					 * un meccanismo di risoluzione interna che associa questo
+					 * Si verifica che l'onion a cui ci si vuole connettere sia
+					 * valido ed accessibile.
+					 */
+					checkIfOnionExistsAndIsReachable(host);
+					/*
+					 * l'hostname è un .onion allora deve essere utilizzato un
+					 * meccanismo di risoluzione interna che associa questo
 					 * onion ad un indirizzo privato; successivamente quando
 					 * verrà richieta la connessinoe http(s) si andrà alla
 					 * ricerca della risoluzione interna.
@@ -154,13 +197,21 @@ public class TorDNSServer extends Thread {
 					 * .onion
 					 */
 					inetAddress = onionBinder.getInetAddress();
-				} while (false);
+				} catch (final IOException ioe) {
+					/*
+					 * Si stampa il messaggio a video, questo non è un errore
+					 * grave. Stampando a video lato server si riesce a capire
+					 * cosa sta succedendo. I fallimenti potrebbero essere
+					 * causati dalla rete lenta o servizi non disponibili.
+					 */
+					createARecord = false;
+				}
 			} else {
 				/* E' un hostname canonico, lo risolvo attraverso TOR. */
 				inetAddress = torResolverService.resolveDNS(host);
 			}
 
-			if (reply) {
+			if (createARecord) {
 				/*
 				 * Creo il record di risposta se l'onion esiste e raggiungibile,
 				 * altrimenti rispondo con un record vuoto.

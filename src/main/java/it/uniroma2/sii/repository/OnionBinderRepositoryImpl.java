@@ -226,4 +226,19 @@ public class OnionBinderRepositoryImpl implements OnionBinderRepositoryCustom {
 			return onionBinder;
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see it.uniroma2.sii.repository.OnionBinderRepositoryCustom#
+	 * checkIfOnionBinderExistsWithoutCacheRefreshing(java.lang.String)
+	 */
+	@Override
+	@Transactional
+	public boolean checkIfOnionBinderExistsWithoutCacheRefreshing(
+			final String onion) {
+		final OnionBinder onionBinder = onionBinderRepository
+				.findByOnionName(onion);
+		return (onionBinder != null);
+	}
 }
