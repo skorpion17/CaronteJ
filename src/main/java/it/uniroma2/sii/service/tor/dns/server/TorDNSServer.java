@@ -58,10 +58,18 @@ public class TorDNSServer extends Thread {
 	@Value("${proxy.tor.bind.port}")
 	private int proxyTorBindPort;
 	/**
-	 * Per contattare gli onioni si prova sulle porte dei servizi HTTP e HTTPS.
+	 * Per contattare gli onioni si prova sulle porte dei servizi HTTP
 	 */
 	@Value("${http.service.ports}")
-	private int[] onionServicePort;
+	private int[] onionHttpServicePort;
+	/**
+	 * Per contattare gli onioni si prova sulle porte dei servizi HTTPS
+	 */
+	@Value("${https.service.ports}")
+	private int[] onionHttpsServicePort;
+
+	@Value("${proxy.tor.onion.resolution.timeout}")
+	private int onionConnectTimeoutInMillis;
 
 	private DatagramSocket datagramSocket;
 
@@ -69,7 +77,20 @@ public class TorDNSServer extends Thread {
 	private Object lock = new Object();
 	private boolean started = false;
 
-	private final int ONION_CONNECT_TIMEOUT_IN_MILLIS = 10000;
+	/**
+	 * Permette di effettuare l'unione di due array.
+	 * 
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	private static int[] combineIntegerArrays(final int[] a, final int[] b) {
+		final int length = a.length + b.length;
+		final int[] result = new int[length];
+		System.arraycopy(a, 0, result, 0, a.length);
+		System.arraycopy(b, 0, result, a.length, b.length);
+		return result;
+	}
 
 	/**
 	 * Gestore delle richieste di risoluzione dei nomi inoltrate al server.
@@ -123,16 +144,18 @@ public class TorDNSServer extends Thread {
 				return;
 			}
 			boolean isReachable = false;
-			for (int i = 0; i < onionServicePort.length; ++i) {
+			final int[] checkPorts = combineIntegerArrays(onionHttpServicePort,
+					onionHttpsServicePort);
+			for (int i = 0; i < checkPorts.length; ++i) {
 				/*
 				 * Per ogni porta su cui può essere in ascolto un servizio
 				 * onion.
 				 */
 				final Socket socket = new SOCKSSocket(getTorSocketAddress());
 				try {
-					socket.setSoTimeout(ONION_CONNECT_TIMEOUT_IN_MILLIS);
+					socket.setSoTimeout(onionConnectTimeoutInMillis);
 					InetSocketAddress inetSockAddress = InetSocketAddress
-							.createUnresolved(onion, onionServicePort[i]);
+							.createUnresolved(onion, checkPorts[i]);
 					socket.connect(inetSockAddress);
 					/*
 					 * Se sono arrivato fin qui, la connessione con l'onion è
