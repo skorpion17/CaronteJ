@@ -29,7 +29,7 @@
 			<value>org.apache.derby.jdbc.EmbeddedDriver</value>
 		</property>
 		<property name="url">
-			<value>jdbc:derby:target/testDB;create=true</value>
+			<value>${db.url}</value>
 		</property>
 		<property name="username">
 			<value>derby</value>
@@ -51,7 +51,7 @@
 				<prop key="hibernate.dialect">org.hibernate.dialect.DerbyDialect</prop>
 				<prop key="hibernate.show_sql">true</prop>
 				<prop key="hibernate.format_sql">false</prop>
-				<prop key="hibernate.hbm2ddl.auto">create</prop>
+				<prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto.value}</prop>
 			</props>
 		</property>
 	</bean>

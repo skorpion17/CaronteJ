@@ -267,10 +267,9 @@ public class ProxyConnectionHandler extends Thread {
 		proxyServerSocket = new SOCKSSocket(
 				httpProxyServer.getTorSocketAddress());
 
-		/*
-		 * setto un timeout di 5 secondi per la socket verso TOR.
-		 */
-		proxyServerSocket.setSoTimeout(5000);
+		/* Si imposta il timeout per la socket verso Tor. */
+		proxyServerSocket.setSoTimeout(httpProxyServer
+				.getWebProxySOCKSTimeoutInMillis());
 
 		/* .onion */
 		if (onionBinderService

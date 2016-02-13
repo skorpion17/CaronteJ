@@ -39,7 +39,6 @@ public class WebProxyServer extends Thread {
 	@Value("${https.service.ports}")
 	private int[] httpsServicePorts;
 	private HashSet<Integer> httpsServicePortsSet = new HashSet<Integer>();
-
 	/**
 	 * Porta su cui il server WebProxyServer è in ascolto.
 	 */
@@ -55,6 +54,11 @@ public class WebProxyServer extends Thread {
 	 */
 	@Value("${proxy.tor.bind.port}")
 	private int proxyTorBindPort;
+	/**
+	 * Timeout nell'apertura della socks con il client di Tor per il web proxy.
+	 */
+	@Value("${proxy.web.server.socks.timeout}")
+	private int webProxySOCKSTimeoutInMillis;
 
 	@Autowired
 	private OnionBinderService onionBinderService;
@@ -103,6 +107,16 @@ public class WebProxyServer extends Thread {
 		} finally {
 			IOUtils.closeQuitely(serverSocket);
 		}
+	}
+
+	/**
+	 * Ritorna il timeout in millisecondi per la connessione della socket verso
+	 * il client Tor.
+	 * 
+	 * @return
+	 */
+	public int getWebProxySOCKSTimeoutInMillis() {
+		return webProxySOCKSTimeoutInMillis;
 	}
 
 	/**

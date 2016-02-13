@@ -68,7 +68,7 @@ public class TorDNSServer extends Thread {
 	@Value("${https.service.ports}")
 	private int[] onionHttpsServicePort;
 
-	@Value("${proxy.tor.onion.resolution.timeout}")
+	@Value("${dns.tor.onion.resolution.timeout}")
 	private int onionConnectTimeoutInMillis;
 
 	private DatagramSocket datagramSocket;
@@ -176,7 +176,9 @@ public class TorDNSServer extends Thread {
 				 * l'eccezione.
 				 */
 				throw new SocketException(
-						String.format("%s is not reachable at this moment, please try later."));
+						String.format(
+								"%s is not reachable at this moment, please try later.",
+								onion));
 			}
 		}
 
