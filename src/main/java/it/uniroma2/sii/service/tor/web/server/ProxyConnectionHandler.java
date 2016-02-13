@@ -289,6 +289,8 @@ public class ProxyConnectionHandler extends Thread {
 		 * senza che vi sia la risoluzione del nome in modo tale che sia la rete
 		 * TOR a risolvere il nome qualora ve ne fosse la necessità.
 		 */
+		// System.out.printf("\t @@@ %d @@@ \n",
+		// System.currentTimeMillis());
 		proxyServerSocket.connect(destSocketAddress);
 		/*
 		 * Si cerca di determinare in base alla porta di destinazione il tipo di
