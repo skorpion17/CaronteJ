@@ -16,7 +16,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
  * comando durante l'esecuzione del .jar utilizzando
  * -DpropertySource=file:PATH_DEL_FILE_DI_PROPERTIES.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 @Configuration

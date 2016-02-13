@@ -12,6 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
+/**
+ * Entry point per l'applicazione.
+ * 
+ * @author Andrea Mayer, Emanuele Altomare
+ *
+ */
 @Component
 public class App {
 	/**
@@ -72,5 +78,6 @@ public class App {
 		/* Avvia l'applicazione */
 		App app = context.getBean(App.class);
 		app.init();
+		// context.close();
 	}
 }

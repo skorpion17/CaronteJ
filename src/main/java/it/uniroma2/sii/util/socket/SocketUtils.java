@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Utility per la gestione delle Socket.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 public class SocketUtils {
@@ -62,8 +62,7 @@ public class SocketUtils {
 		final short saFamily = inputStream.readShort();
 		/*
 		 * Per ora il parametro saFamily viene ingnorati, si utilizza per
-		 * l'indirizzo sempre un indirizzo IPv4. TODO: Rendere generico ed
-		 * evitare di cablare la saFamily su IPV4.
+		 * l'indirizzo sempre un indirizzo IPv4.
 		 */
 		final int ip = inputStream.readInt();
 		final short port = inputStream.readShort();

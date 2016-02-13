@@ -10,9 +10,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * DAO per OnionBinder.
+ * Repository per OnionBinder. Il repository permette l'accesso ai
+ * {@link OnionBinder} che sono disponibili attualmente nel DB.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 @Repository

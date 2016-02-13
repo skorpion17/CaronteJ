@@ -5,7 +5,7 @@ import java.io.IOException;
 /**
  * Eccezione sulla transazione. Questa eccezione è checked.
  * 
- * @author Andrea Mayer
+ * @author Andrea Mayer Mayer
  *
  */
 public class SimpleTransactionException extends IOException {

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 /**
  * HTTProxyServer
  * 
- * @author andrea
+ * @author Andrea Mayer, Emanuele Altomare
  *
  */
 @Service
@@ -142,7 +142,7 @@ public class WebProxyServer extends Thread {
 	}
 
 	/**
-	 * Ottiene l'indirizzo presso cui il server di tor è in ascoto.
+	 * Ottiene l'indirizzo presso cui il server di tor è in ascolto.
 	 * 
 	 * @return
 	 */

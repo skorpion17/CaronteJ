@@ -118,6 +118,13 @@ public class OnionURLGenerator {
 		return onion;
 	}
 
+	/**
+	 * Permette di memorizzare l'indirizzo .onion generato.
+	 * 
+	 * @throws NoSuchAlgorithmException
+	 * @throws CertificateException
+	 * @throws IOException
+	 */
 	public void saveOnionAddress() throws NoSuchAlgorithmException,
 			CertificateException, IOException {
 		/*

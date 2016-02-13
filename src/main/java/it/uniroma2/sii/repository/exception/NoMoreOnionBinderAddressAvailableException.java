@@ -6,7 +6,7 @@ import java.io.IOException;
  * Questa eccezione notifica che sono terminati gli indirizzi usati per
  * costruire la tabella di mapping tra .onion e indirizzi privati.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 public class NoMoreOnionBinderAddressAvailableException extends IOException {

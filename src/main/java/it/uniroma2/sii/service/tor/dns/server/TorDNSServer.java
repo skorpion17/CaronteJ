@@ -28,7 +28,7 @@ import org.xbill.DNS.Section;
  * hostname in indirizzi ip. Tiene in considerazione anche della risoluzione
  * interna per la risoluzione di eventuali .onion.
  * 
- * @author Andrea Mayer, Emanuele Altomare
+ * @author Andrea Mayer Mayer, Emanuele Altomare
  *
  */
 @Service
@@ -95,7 +95,7 @@ public class TorDNSServer extends Thread {
 	/**
 	 * Gestore delle richieste di risoluzione dei nomi inoltrate al server.
 	 * 
-	 * @author andrea
+	 * @author Andrea Mayer
 	 *
 	 */
 	private class TorDNSRequestHandler extends Thread {

@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ * Servizio che fornisce l'accesso per la risoluzione degli .onion e per la
+ * registrazione di questi attraverso l'utilizzo dei {@link OnionBinder}.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 @Service

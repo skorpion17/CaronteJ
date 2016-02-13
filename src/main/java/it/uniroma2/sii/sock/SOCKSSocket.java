@@ -7,7 +7,7 @@ import java.net.Socket;
 /**
  * SOCKS Socket.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 public class SOCKSSocket extends Socket {

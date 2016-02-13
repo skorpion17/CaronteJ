@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Test su {@link OnionBinderRepository}.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -51,6 +51,5 @@ public class OnionBinderRepositoryTest {
 		final InetSocketAddress sockAddress = new InetSocketAddress(o.getInetAddress(), 80);
 		SocketAddress sz = onionBinderService.resolveCachedOnionNameByInternalInetSocketAddress(sockAddress);
 		System.out.println(sz);
-		
 	}
 }
