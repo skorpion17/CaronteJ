@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Test su {@link OnionBinderRepository}.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)

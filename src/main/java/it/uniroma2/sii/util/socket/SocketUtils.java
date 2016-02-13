@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Utility per la gestione delle Socket.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 public class SocketUtils {

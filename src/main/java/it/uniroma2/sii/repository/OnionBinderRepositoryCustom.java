@@ -8,7 +8,7 @@ import java.io.IOException;
 /**
  * Repository custom per {@link OnionBinder}.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 public interface OnionBinderRepositoryCustom {

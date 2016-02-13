@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Implementazione di {@link OnionBinderRepositoryCustom}.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 @Repository

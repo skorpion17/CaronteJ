@@ -11,7 +11,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 /**
  * Configurazione per l'applicazione.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 @Configuration

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 /**
  * Configurazione per OnionBinderService.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 public class OnionBinderConfigImpl implements OnionBinderConfig {

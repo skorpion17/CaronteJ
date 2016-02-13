@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * DAO per OnionBinder.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 @Repository

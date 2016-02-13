@@ -20,7 +20,7 @@ import javax.persistence.TemporalType;
  * .onion rendendo possibile gestire la risoluzione di un qualsiasi indirizzo
  * (sia un hidden service che un host canonico).
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 @Entity

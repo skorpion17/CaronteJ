@@ -57,12 +57,12 @@ public class FileLogger extends LoggerAbstract {
 	 * 
 	 * @author Emanuele Altomare
 	 */
-	private class LogFileSaver extends Thread {
+	private class LogFileWriter extends Thread {
 
 		/**
 		 * Costruttore di default.
 		 */
-		public LogFileSaver() {
+		public LogFileWriter() {
 		}
 
 		/**
@@ -72,11 +72,11 @@ public class FileLogger extends LoggerAbstract {
 		 * 
 		 * @author Emanuele Altomare
 		 */
-		private class LogFileSaverWorker extends Thread {
+		private class LogFileWriterWorker extends Thread {
 
 			final HttpDataContainer container;
 
-			LogFileSaverWorker(HttpDataContainer container) {
+			LogFileWriterWorker(HttpDataContainer container) {
 				this.container = container;
 			}
 
@@ -258,7 +258,7 @@ public class FileLogger extends LoggerAbstract {
 								/*
 								 * lo creo e lo avvio.
 								 */
-								new LogFileSaverWorker(container).start();
+								new LogFileWriterWorker(container).start();
 
 								/*
 								 * setto infine a true la variabile che indica
@@ -311,7 +311,7 @@ public class FileLogger extends LoggerAbstract {
 		/*
 		 * faccio partire il thread che gestisce il salvataggio su file.
 		 */
-		new LogFileSaver().start();
+		new LogFileWriter().start();
 
 	}
 

@@ -22,7 +22,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * solo dopo la chiusura del metodo.
  * 
  * 
- * @author Andrea Mayer
+ * @author Andrea Mayer Mayer
  *
  */
 public class SimpleTransaction extends DefaultTransactionDefinition {

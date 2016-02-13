@@ -58,7 +58,7 @@ public class ProxyConnectionHandler extends Thread {
 	/**
 	 * Tipi di protocolli supportati dall'handler.
 	 * 
-	 * @author andrea
+	 * @author Andrea Mayer
 	 *
 	 */
 	public enum ProtocolType {
@@ -73,7 +73,7 @@ public class ProxyConnectionHandler extends Thread {
 	/**
 	 * Lettura asincrona della risposta del server.
 	 * 
-	 * @author Andrea Mayer, Emanuele Altomare
+	 * @author Andrea Mayer Mayer, Emanuele Altomare
 	 *
 	 */
 	private class AsynchronousResponse extends Thread {

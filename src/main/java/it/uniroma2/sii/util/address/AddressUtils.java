@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 /**
  * Utility per la gestione degli indirizzi.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 public class AddressUtils {

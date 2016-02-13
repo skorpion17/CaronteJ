@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 /**
  * Factory per i {@link OnionURLGenerator}.
  * 
- * @author Andrea Mayer, Emanuele Altomare
+ * @author Andrea Mayer Mayer, Emanuele Altomare
  *
  */
 @Component

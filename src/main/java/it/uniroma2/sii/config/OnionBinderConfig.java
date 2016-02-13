@@ -5,7 +5,7 @@ import it.uniroma2.sii.service.tor.OnionBinderService;
 /**
  * Configurazione per {@link OnionBinderService}
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 public interface OnionBinderConfig {

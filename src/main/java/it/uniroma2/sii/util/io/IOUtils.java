@@ -9,7 +9,7 @@ import java.net.Socket;
 /**
  * Utilities per I/O.
  * 
- * @author andrea
+ * @author Andrea Mayer
  *
  */
 public class IOUtils {
