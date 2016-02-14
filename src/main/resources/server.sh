@@ -6,7 +6,7 @@
 
 ##### Configurazione ######
 
-ARCHIVE_NAME="proxy-tor-1.0.0.jar"
+ARCHIVE_NAME="proxy2tor-1.0.0.jar"
 APPLICATION_PROPERTIES_FILENAME="application.properties"
 
 ### Fine configurazione ###
