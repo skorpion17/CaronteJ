@@ -190,5 +190,5 @@
 		</plugins>
 	</build>
 	<groupId>it.uniroma2.sii</groupId>
-	<artifactId>proxy-tor</artifactId>
+	<artifactId>proxy2tor</artifactId>
 </project>
