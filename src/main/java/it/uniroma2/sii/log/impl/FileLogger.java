@@ -36,7 +36,8 @@ import org.springframework.beans.factory.annotation.Value;
  * @author Emanuele Altomare
  */
 public class FileLogger extends LoggerAbstract {
-
+	public static final String LOG_NAME = "proxy2tor.log";
+	
 	@Value("${logger.log.files.path}")
 	private String LOG_FOLDER_PATH;
 	private BufferedWriter fileWriter = null;
@@ -293,7 +294,7 @@ public class FileLogger extends LoggerAbstract {
 		 */
 		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
 		String formattedDate = format.format(Calendar.getInstance().getTime());
-		String fileName = String.format("%s-carontej.log", formattedDate);
+		String fileName = String.format("%s_%s", formattedDate, LOG_NAME);
 		String stringFilePath = String.format("%s%s%s", LOG_FOLDER_PATH,
 				File.separator, fileName);
 		/*

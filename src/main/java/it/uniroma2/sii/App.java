@@ -9,6 +9,7 @@ import it.uniroma2.sii.service.tor.web.server.WebProxyServer;
 import java.net.UnknownHostException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,8 @@ public class App {
 	 */
 	public static final String APPLICATION_CONTEXT_XML = "applicationContext.xml";
 
+	@Value("${onion.generator.main.app.start}")
+	private boolean allowOnionGeneratorRunAtBoostrap = false;
 	@Autowired
 	private TorDNSServer torDNSServer;
 	@Autowired
@@ -35,33 +38,45 @@ public class App {
 	private OnionURL onionURL;
 
 	/**
-	 * TODO: Inizializza l'applicazione.
+	 * Inizializzatore della applicazione.
 	 */
 	public void init() {
 		torDNSServer.start();
 		httpProxyServer.start();
+		/*
+		 * All'avvio dell'applicazione genera un .onion per mostrare il
+		 * funzionamento del generatore di URL di Tor.
+		 */
 		testGenerateOnionAddress();
 	}
 
 	/**
-	 * metodo per testare la generazione di un indirizzo .onion
+	 * Metodo per testare la generazione di un indirizzo .onion
 	 */
 	private void testGenerateOnionAddress() {
-		try {
-			OnionURLGenerator generator = onionURL.createOnionURLGenerator();
-			System.out.println("ONION ADDRESS:");
-			System.out.println(generator.generateOnionAddress() + "\n");
-			System.out.println("PUBLIC KEY:");
-			System.out
-					.println(OnionURL.convertToPem(generator.getPubKeyInDer())
-							+ "\n");
-			System.out.println("PRIVATE KEY:");
-			System.out.println(OnionURL.convertToPem(generator
-					.getPrivKeyInDer()));
-
-			generator.saveOnionAddress();
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (allowOnionGeneratorRunAtBoostrap) {
+			try {
+				/*
+				 * Sleep soltanto per questioni di estetica, evita che l'output
+				 * del dei servizi si sovrapponga a quello del test sul
+				 * generatore.
+				 */
+				Thread.sleep(1000);
+				System.out.println("\n\t >>> DEMO OnionURLGenerator <<< ");
+				OnionURLGenerator generator = onionURL
+						.createOnionURLGenerator();
+				System.out.println("ONION ADDRESS:");
+				System.out.println(generator.generateOnionAddress() + "\n");
+				System.out.println("PUBLIC KEY:");
+				System.out.println(OnionURL.convertToPem(generator
+						.getPubKeyInDer()) + "\n");
+				System.out.println("PRIVATE KEY:");
+				System.out.println(OnionURL.convertToPem(generator
+						.getPrivKeyInDer()));
+				generator.saveOnionAddress();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
