@@ -24,6 +24,9 @@ import it.uniroma2.sii.util.data.http.exception.HttpException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Rappresenta il pacchetto HTTP.
@@ -212,10 +215,21 @@ public abstract class HttpData extends Data {
 	}
 
 	public String toString() {
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			/* termino l'applicazione */
+			System.exit(1);
+		}
+		md.update(messageBody != null ? messageBody : new byte[0]);
+		byte[] digest = md.digest();
+		String hash = String.format("%064x", new BigInteger(1, digest));
 		double bodyLength = (messageBody != null ? (double) messageBody.length
 				: 0.0) / (double) 1024;
-		return String.format("%s%sBody Dimension: %sKB\n",
+		return String.format("%s%sBody Dimension: %s KB\nHash: [SHA256]%s\n",
 				startLine.toString(), headers.toString(),
-				String.valueOf(bodyLength));
+				String.valueOf(bodyLength),hash);
 	}
 }
