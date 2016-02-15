@@ -195,9 +195,10 @@ public abstract class HttpData extends Data {
 	}
 
 	public String toString() {
+		double bodyLength = messageBody.length / 1024;
 		return String.format("%s%sBody Dimension: %sKB\n", startLine.toString(),
 				headers.toString(),
-				messageBody != null ? String.valueOf(messageBody.length / 1024)
+				messageBody != null ? String.valueOf(bodyLength)
 						: String.valueOf(0));
 	}
 }

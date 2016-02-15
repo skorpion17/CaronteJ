@@ -286,7 +286,7 @@ public class HttpUtils {
 			 * se il metodo è uno che non prevede un body...
 			 */
 			if (!requestLine.getMethod().equals("PUT")
-					|| !requestLine.getMethod().equals("POST")) {
+					&& !requestLine.getMethod().equals("POST")) {
 
 				/*
 				 * esco.
